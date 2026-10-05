@@ -561,6 +561,22 @@ body {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
+.tab-cnt {
+  display: inline-block;
+  font-size: 0.72rem;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+  margin-left: 4px;
+}
+
+.tab.a .tab-cnt {
+  background: rgba(59, 130, 246, 0.25);
+  color: #93c5fd;
+  border: 1px solid rgba(59, 130, 246, 0.4);
+}
+
 /* Search Bar */
 .sr {
   display: flex;
@@ -2031,6 +2047,9 @@ function openApp() {
    ========================================================================== */
 function ensureCats() {
   DEPS.forEach(d => {
+    if (categories[d.id] && !Array.isArray(categories[d.id]) && typeof categories[d.id] === 'object') {
+      categories[d.id] = Object.values(categories[d.id]);
+    }
     if (!Array.isArray(categories[d.id])) {
       categories[d.id] = [];
       if (d.id !== 'ruk') {
@@ -2177,6 +2196,9 @@ function deleteCat(id) {
    ========================================================================== */
 function ensure() {
   DEPS.forEach(d => {
+    if (data[d.id] && !Array.isArray(data[d.id]) && typeof data[d.id] === 'object') {
+      data[d.id] = Object.values(data[d.id]);
+    }
     if (!Array.isArray(data[d.id])) data[d.id] = [];
   });
   DEPS.forEach(d => {
@@ -2205,6 +2227,8 @@ function load() {
   db.ref('cgb_proverki').on('value', s => {
     data = s.val() || {};
     ensure();
+    renTabs();
+    renderCats();
     render();
   });
 }
@@ -2254,9 +2278,13 @@ function sync(dep, emp) {
    ОТРИСОВКА ВКЛАДОК И СПИСКА
    ========================================================================== */
 function renTabs() {
-  document.getElementById('tabs').innerHTML = DEPS.map(d =>
-    `<button class="tab ${tab === d.id ? 'a' : ''}" onclick="setTab('${d.id}')">${esc(d.name)}</button>`
-  ).join('');
+  ensure();
+  document.getElementById('tabs').innerHTML = DEPS.map(d => {
+    const cnt = (data[d.id] || []).length;
+    return `<button class="tab ${tab === d.id ? 'a' : ''}" onclick="setTab('${d.id}')">` +
+      `${esc(d.name)}${cnt > 0 ? ` <span class="tab-cnt">${cnt}</span>` : ''}` +
+    `</button>`;
+  }).join('');
 }
 
 function setTab(id) {
