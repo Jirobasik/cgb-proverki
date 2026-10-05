@@ -1,0 +1,2964 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>АБ — Панель управления (Личный состав)</title>
+<style>:root {
+  --bg: #0d121b;
+  --bg-subtle: #121926;
+  --card: #16202f;
+  --card-hover: #1b273a;
+  --card-inner: #0f1622;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-subtle: rgba(255, 255, 255, 0.05);
+  --border-focus: rgba(99, 140, 255, 0.45);
+  --text: #edf2f7;
+  --text-secondary: #94a3b8;
+  --muted: #64748b;
+  --accent: #3b82f6;
+  --accent-soft: rgba(59, 130, 246, 0.12);
+  --accent-hover: #2563eb;
+  --green: #10b981;
+  --green-soft: rgba(16, 185, 129, 0.12);
+  --green-border: rgba(16, 185, 129, 0.3);
+  --red: #f43f5e;
+  --red-soft: rgba(244, 63, 94, 0.12);
+  --red-border: rgba(244, 63, 94, 0.3);
+  --yellow: #f59e0b;
+  --yellow-soft: rgba(245, 158, 11, 0.12);
+  --purple: #8b5cf6;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 16px -2px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 10px 30px -4px rgba(0, 0, 0, 0.5);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Background Atmosphere */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: 
+    radial-gradient(circle at 15% 15%, rgba(59, 130, 246, 0.05), transparent 40%),
+    radial-gradient(circle at 85% 85%, rgba(139, 92, 246, 0.04), transparent 45%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Auth Screens */
+.auth {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  position: relative;
+  z-index: 1;
+}
+
+.box {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  width: 100%;
+  max-width: 410px;
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(12px);
+}
+
+.box h1 {
+  text-align: center;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.sub {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 22px;
+}
+
+.f {
+  margin-bottom: 14px;
+}
+
+.f label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.f input, .f select, input, select {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--card-inner);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.9rem;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.f input:focus, select:focus, input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+/* Buttons */
+.btn {
+  cursor: pointer;
+  font-weight: 600;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 9px 15px;
+  font: inherit;
+  font-size: 0.88rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn-p {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
+}
+
+.btn-p:hover {
+  background: var(--accent-hover);
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+}
+
+.btn-s {
+  background: var(--green-soft);
+  color: #34d399;
+  border: 1px solid var(--green-border);
+}
+
+.btn-s:hover {
+  background: rgba(16, 185, 129, 0.22);
+  color: #6ee7b7;
+}
+
+.btn-d {
+  background: var(--red-soft);
+  color: #fb7185;
+  border: 1px solid var(--red-border);
+}
+
+.btn-d:hover {
+  background: rgba(244, 63, 94, 0.22);
+  color: #fda4af;
+}
+
+.btn-g {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+.btn-g:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.btn-sm {
+  padding: 5px 10px;
+  font-size: 0.8rem;
+  border-radius: 6px;
+}
+
+.err {
+  background: var(--red-soft);
+  border: 1px solid var(--red-border);
+  color: #fca5a5;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.86rem;
+  margin-bottom: 14px;
+  display: none;
+}
+
+.err.on {
+  display: block;
+}
+
+/* Top App Header */
+#app {
+  display: none;
+  position: relative;
+  z-index: 1;
+}
+
+.top {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 24px;
+  background: rgba(13, 18, 27, 0.82);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.top h1 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #fff;
+}
+
+.top h1 span {
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 0.88rem;
+  margin-left: 4px;
+}
+
+.tr {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+}
+
+#st {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  color: #34d399;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.dot.on {
+  background: var(--green);
+  box-shadow: 0 0 6px var(--green);
+}
+
+.dot.off {
+  background: var(--red);
+  box-shadow: 0 0 6px var(--red);
+}
+
+.av {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: var(--card);
+  cursor: pointer;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: var(--accent);
+  font-size: 0.85rem;
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.av:hover {
+  border-color: var(--accent);
+  transform: scale(1.04);
+}
+
+.av img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Dropdown Menu */
+.drop {
+  position: absolute;
+  top: 48px;
+  right: 48px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  min-width: 190px;
+  padding: 6px;
+  display: none;
+  z-index: 60;
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(12px);
+}
+
+.drop.open {
+  display: block;
+}
+
+.drop button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  padding: 9px 12px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.drop button:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.bur {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text);
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.bur:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+/* Sidebar Drawer */
+.side {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 270px;
+  background: #0a0f17;
+  border-left: 1px solid var(--border);
+  z-index: 100;
+  transform: translateX(100%);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  box-shadow: -8px 0 28px rgba(0, 0, 0, 0.5);
+}
+
+.side.open {
+  transform: none;
+}
+
+.ov {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(3px);
+  z-index: 99;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s;
+}
+
+.ov.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.sh {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sh strong {
+  font-size: 1rem;
+  letter-spacing: -0.01em;
+}
+
+.sn {
+  padding: 12px;
+  flex: 1;
+}
+
+.nb {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 4px;
+  text-align: left;
+  transition: all 0.15s;
+}
+
+.nb:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.nb.a {
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+/* Main Container */
+.main {
+  padding: 24px 20px 48px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.sec {
+  display: none;
+}
+
+.sec.a {
+  display: block;
+}
+
+.tit {
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 18px;
+  color: #fff;
+}
+
+/* Tabs Navigation */
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  margin-bottom: 14px;
+}
+
+.tab {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  padding: 8px 16px;
+  border-radius: 9px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+.tab:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.tab.a {
+  background: var(--card);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Search Bar */
+.sr {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding: 8px 14px;
+  background: var(--card);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  position: relative;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.sr:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+.sr input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 6px 0;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.sr input:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.sres {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  display: none;
+  z-index: 30;
+  max-height: 240px;
+  overflow: auto;
+  box-shadow: var(--shadow-lg);
+}
+
+.sres.on {
+  display: block;
+}
+
+.si {
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  border-bottom: 1px solid var(--border-subtle);
+  transition: background 0.12s;
+}
+
+.si:last-child {
+  border-bottom: none;
+}
+
+.si:hover {
+  background: rgba(59, 130, 246, 0.12);
+}
+
+/* Add Employee Bar */
+.add-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 14px 18px;
+  background: var(--card);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.add-col {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.add-col label {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.add-col input, .add-col select {
+  padding: 8px 12px;
+  font-size: 0.86rem;
+  border-radius: 7px;
+}
+
+/* Category Management Bar */
+.cat-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding: 10px 16px;
+  background: rgba(22, 32, 47, 0.6);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+
+.cat-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.cat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.22);
+  color: #93c5fd;
+}
+
+.cat-chip .chip-btn {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 0 2px;
+  opacity: 0.65;
+  font-size: 0.75rem;
+  transition: opacity 0.15s;
+}
+
+.cat-chip .chip-btn:hover {
+  opacity: 1;
+}
+
+/* Filter Checkbox */
+.only-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 12px 0;
+}
+
+.only-wrap label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.86rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 5px 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid transparent;
+  transition: all 0.15s;
+}
+
+.only-wrap label:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.only-wrap input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+/* Category Groups (Calm, Elegant Headers) */
+.cat-group {
+  margin: 20px 0 12px;
+}
+
+.cat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.92rem;
+  margin-bottom: 8px;
+  backdrop-filter: blur(8px);
+  transition: all 0.15s;
+}
+
+.cat-header.hue-0 {
+  background: rgba(59, 130, 246, 0.09);
+  border: 1px solid rgba(59, 130, 246, 0.22);
+  color: #93c5fd;
+}
+
+.cat-header.hue-1 {
+  background: rgba(139, 92, 246, 0.09);
+  border: 1px solid rgba(139, 92, 246, 0.22);
+  color: #c4b5fd;
+}
+
+.cat-header.hue-2 {
+  background: rgba(16, 185, 129, 0.09);
+  border: 1px solid rgba(16, 185, 129, 0.22);
+  color: #6ee7b7;
+}
+
+.cat-header.hue-3 {
+  background: rgba(245, 158, 11, 0.09);
+  border: 1px solid rgba(245, 158, 11, 0.22);
+  color: #fde68a;
+}
+
+.cat-header.hue-none {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed var(--border);
+  color: var(--text-secondary);
+}
+
+.cat-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cat-count {
+  font-size: 0.74rem;
+  font-weight: 500;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 2px 8px;
+  border-radius: 999px;
+  opacity: 0.85;
+}
+
+.cat-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Employee Card (Calm, Premium Look) */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  margin-bottom: 10px;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.18s, box-shadow 0.18s, transform 0.18s;
+}
+
+.card:hover {
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.card.hi {
+  border-color: var(--accent);
+  box-shadow: 0 0 16px rgba(59, 130, 246, 0.35);
+}
+
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.card-info {
+  flex: 1;
+  min-width: 180px;
+}
+
+.card-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.nm {
+  font-weight: 600;
+  font-size: 0.98rem;
+  color: #f8fafc;
+  letter-spacing: -0.01em;
+}
+
+.ps {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 2px 7px;
+  border-radius: 5px;
+  border: 1px solid var(--border-subtle);
+}
+
+.card-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.mt {
+  color: #fbbf24;
+  font-weight: 500;
+}
+
+.gl-tag {
+  font-size: 0.72rem;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(59, 130, 246, 0.1);
+  color: #93c5fd;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  font-weight: 500;
+}
+
+.card-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+}
+
+.acts-row {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+/* Checkboxes Grid - 5 Equal, Symmetrical Tiles */
+.cks {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.ck {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--card-inner);
+  padding: 9px 6px;
+  border-radius: 9px;
+  border: 1px solid var(--border-subtle);
+  text-align: center;
+  min-height: 80px;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.ck:hover {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.ck-label {
+  font-size: 0.74rem;
+  color: var(--text-secondary);
+  line-height: 1.25;
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  word-break: break-word;
+  font-weight: 500;
+}
+
+/* Status Buttons */
+.sb {
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  font-weight: 700;
+  transition: all 0.15s ease;
+}
+
+.sb:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--text);
+  background: rgba(59, 130, 246, 0.08);
+}
+
+.sb.ok {
+  background: var(--green-soft);
+  border-color: var(--green-border);
+  color: #34d399;
+}
+
+.sb.bad {
+  background: var(--red-soft);
+  border-color: var(--red-border);
+  color: #fb7185;
+}
+
+.sb:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Forms & Panels */
+.fc {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow-sm);
+}
+
+.fc h3 {
+  margin-bottom: 14px;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #fff;
+}
+
+.fr {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.fr .x {
+  flex: 1;
+  min-width: 120px;
+}
+
+.fr .x label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 5px;
+}
+
+/* Badges */
+.badge {
+  font-size: 0.72rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 500;
+}
+
+.ra { background: rgba(139, 92, 246, 0.15); color: #c4b5fd; border: 1px solid rgba(139, 92, 246, 0.25); }
+.rs { background: rgba(59, 130, 246, 0.15); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.25); }
+.re { background: rgba(100, 116, 139, 0.15); color: #94a3b8; border: 1px solid rgba(100, 116, 139, 0.25); }
+
+.db {
+  display: inline-block;
+  font-size: 0.74rem;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.dv { background: var(--red-soft); color: #fb7185; border: 1px solid var(--red-border); }
+.dp { background: var(--yellow-soft); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+.dr { background: var(--accent-soft); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.25); }
+
+/* Modals */
+.mbg {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.mbg.open {
+  display: flex;
+}
+
+.mod {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: var(--shadow-lg);
+}
+
+.mod h3 {
+  margin-bottom: 14px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.ma {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 18px;
+}
+
+pre.rp {
+  white-space: pre-wrap;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  background: var(--card-inner);
+  padding: 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  min-height: 80px;
+  color: #cbd5e1;
+}
+
+.hint {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin-top: 6px;
+}
+
+.empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+}
+
+/* UI Settings */
+#fxCanvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.25;
+}
+
+.fx-settings {
+  margin-top: 8px;
+}
+
+.fx-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.fx-row:last-child {
+  border-bottom: 0;
+}
+
+.fx-label {
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+.fx-label small {
+  display: block;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  margin-top: 2px;
+  font-weight: 400;
+}
+
+.fx-toggle {
+  width: 42px;
+  height: 24px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--card-inner);
+  padding: 2px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.fx-toggle i {
+  display: block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--muted);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s;
+}
+
+.fx-toggle.on {
+  background: rgba(59, 130, 246, 0.25);
+  border-color: var(--accent);
+}
+
+.fx-toggle.on i {
+  transform: translateX(18px);
+  background: var(--accent);
+}
+
+.fx-range {
+  width: 130px;
+  accent-color: var(--accent);
+}
+
+@keyframes fxPress { 0% { transform: scale(1); } 45% { transform: scale(1.06); } 100% { transform: scale(1); } }
+@keyframes fxBounce { 0% { transform: translateY(0) scale(1); } 45% { transform: translateY(-2px) scale(1.03); } 100% { transform: translateY(0) scale(1); } }
+@keyframes fxGlow { 0% { box-shadow: 0 0 0 rgba(59, 130, 246, 0); } 45% { box-shadow: 0 0 10px rgba(59, 130, 246, 0.4); } 100% { box-shadow: 0 0 0 rgba(59, 130, 246, 0); } }
+@keyframes fxLift { 0% { transform: translateY(0); } 45% { transform: translateY(-3px); } 100% { transform: translateY(0); } }
+
+.fx-pulse { animation: fxPress 0.16s ease; }
+.fx-bounce { animation: fxBounce 0.2s ease; }
+.fx-glow { animation: fxGlow 0.26s ease; }
+.fx-lift { animation: fxLift 0.2s ease; }
+
+@media(max-width: 640px) {
+  .cks { grid-template-columns: repeat(2, 1fr); }
+  .add-bar { flex-direction: column; align-items: stretch; }
+  .card-top { flex-direction: column; }
+  .card-actions { align-items: flex-start; }
+}</style>
+</head>
+<body><canvas id="fxCanvas" aria-hidden="true"></canvas>
+
+<!-- Login Screen -->
+<div class="auth" id="login" style="display:flex">
+  <div class="box">
+    <h1>АБ — Вход</h1>
+    <p class="sub">Панель проверок личного состава</p>
+    <div class="err" id="lErr"></div>
+    <div class="f"><label>Логин</label><input id="lIn" value="maksim-milonov-877-506" placeholder="maksim-milonov-877-506"></div>
+    <div class="f"><label>Пароль</label><input id="pIn" type="password" value="makschinik11" placeholder="Пароль"></div>
+    <button class="btn btn-p" id="lBtn" style="width:100%;margin-top:8px" onclick="login()">Войти</button>
+    <div class="hint" style="text-align:center;margin-top:12px;color:var(--muted)">Локальный режим: вход без Firebase</div>
+  </div>
+</div>
+
+<!-- Main App -->
+<div id="app">
+  <header class="top">
+    <h1>АБ <span>· проверки личного состава</span></h1>
+    <div class="tr">
+      <span id="st" style="font-size:.8rem"><span class="dot on"></span>Локальный режим</span>
+      <button class="av" id="avB" onclick="togMenu()">?</button>
+      <div class="drop" id="avM">
+        <button onclick="go('account');clsMenu()">⚙️ Настройки</button>
+        <button onclick="document.getElementById('avF').click();clsMenu()">🖼️ Аватар</button>
+        <input type="file" id="avF" accept="image/*" style="display:none" onchange="setAv(event)">
+        <button onclick="logout()" style="color:#fca5a5">🚪 Выйти</button>
+      </div>
+      <button class="bur" onclick="togSide()">☰</button>
+    </div>
+  </header>
+
+  <div class="ov" id="ov" onclick="togSide()"></div>
+
+  <aside class="side" id="side">
+    <div class="sh"><strong>Меню</strong><button class="btn btn-g btn-sm" onclick="togSide()">✕</button></div>
+    <nav class="sn">
+      <button class="nb a" data-s="checks" onclick="go('checks')">📋 Проверки</button>
+      <button class="nb" data-s="disciplinary" id="nD" onclick="go('disciplinary')">⚠️ Дисциплинарные</button>
+      <button class="nb" data-s="report" id="nR" onclick="go('report')">📄 Итоговый отчёт</button>
+      <button class="nb" data-s="cleanup" id="nC" onclick="go('cleanup')">🧹 Очистка таблицы</button>
+      <button class="nb" data-s="admin" id="nA" style="display:none" onclick="go('admin')">⚙️ Администрирование</button>
+      <button class="nb" data-s="account" onclick="go('account')">👤 Аккаунт</button>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <!-- SECTION: CHECKS -->
+    <section class="sec a" id="s-checks">
+      <div class="tit">Проверки личного состава</div>
+
+      <div class="sr">
+        <input id="sIn" placeholder="Быстрый поиск по имени, фамилии или номеру паспорта..." oninput="search()">
+        <button class="btn btn-g btn-sm" onclick="clrS()">Сброс</button>
+        <div class="sres" id="sR"></div>
+      </div>
+
+      <!-- Add Employee Bar -->
+      <div class="add-bar" id="addB">
+        <div class="add-col"><label>Имя</label><input id="aN" placeholder="Иван" style="width:100px"></div>
+        <div class="add-col"><label>Фамилия</label><input id="aS" placeholder="Иванов" style="width:110px"></div>
+        <div class="add-col"><label>Паспорт</label><input id="aP" maxlength="7" placeholder="123-456" style="width:85px"></div>
+        <div class="add-col"><label>Отдел</label><select id="aD" onchange="fillG()"></select></div>
+        <div class="add-col" id="aGCol"><label id="aGL">Категория</label><select id="aG" style="min-width:130px"></select></div>
+        <button class="btn btn-p btn-sm" onclick="addE()">＋ Добавить</button>
+      </div>
+
+      <!-- Department Tabs -->
+      <div class="tabs" id="tabs"></div>
+
+      <!-- Category Management Bar (under tabs) -->
+      <div class="cat-bar" id="catBar" style="display:none">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span style="font-size:.82rem;color:var(--muted);font-weight:600">📁 Категории:</span>
+          <div class="cat-chips" id="catChips"></div>
+        </div>
+        <button class="btn btn-g btn-sm" id="btnNewCat" onclick="createCat()">＋ Создать категорию</button>
+      </div>
+
+      <div class="only-wrap">
+        <label><input type="checkbox" id="oU" onchange="syncOnly(this.checked)"> Показывать только непроверенных сотрудников</label>
+      </div>
+
+      <!-- Employees List -->
+      <div id="list"></div>
+
+      <div class="only-wrap" style="margin-top:16px">
+        <label><input type="checkbox" id="oU2" onchange="syncOnly(this.checked)"> Показывать только непроверенных сотрудников</label>
+      </div>
+    </section>
+
+    <!-- SECTION: DISCIPLINARY -->
+    <section class="sec" id="s-disciplinary">
+      <div class="tit">Дисциплинарные взыскания</div>
+      <div class="fc" id="dF">
+        <h3>Выдать взыскание</h3>
+        <div class="fr">
+          <div class="x"><label>Имя</label><input id="dN"></div>
+          <div class="x"><label>Фамилия</label><input id="dS"></div>
+          <div class="x"><label>Паспорт</label><input id="dP" maxlength="7"></div>
+        </div>
+        <div class="fr">
+          <div class="x"><label>Вид</label><select id="dT"><option value="razgovor_admin">Разговор с администрацией больницы</option><option value="preduprezhdenie">Предупреждение</option><option value="vigovor">Выговор</option></select></div>
+          <div class="x"><label>С</label><input type="date" id="dFr"></div>
+          <div class="x"><label>По</label><input type="date" id="dTo"></div>
+        </div>
+        <div class="fr"><div class="x"><label>Комментарий</label><input id="dNo"></div></div>
+        <button class="btn btn-p" style="width:auto" onclick="addD()">Сохранить</button>
+        <div class="hint" id="dM"></div>
+      </div>
+
+      <div class="sr"><input id="dSe" placeholder="Поиск взысканий..." oninput="renD()"></div>
+      <div class="tabs"><button class="tab a" id="dtA" onclick="setDT('active')">Активные</button><button class="tab" id="dtR" onclick="setDT('archive')">Архив</button></div>
+      <div id="dL"></div>
+    </section>
+
+    <!-- SECTION: CLEANUP -->
+    <section class="sec" id="s-cleanup">
+      <div class="tit">Очистка таблицы</div>
+      <div class="fc">
+        <p class="hint" style="margin-bottom:12px">Сбрасывает только отметки проверок (✓ и ✗). Сами сотрудники и категории сохраняются.</p>
+        <div class="fr">
+          <div class="x"><label>Отдел</label><select id="clDep" onchange="fillCleanup()"></select></div>
+          <div class="x"><label>Что очистить</label><select id="clCat"></select></div>
+        </div>
+        <button class="btn btn-d" style="width:auto" onclick="clearChecks()">Очистить проверки</button>
+        <div class="hint" id="clM"></div>
+      </div>
+    </section>
+
+    <!-- SECTION: REPORT -->
+    <section class="sec" id="s-report">
+      <div class="tit">Итоговый отчёт</div>
+      <div class="fc">
+        <div class="fr">
+          <div class="x"><label>С</label><input type="date" id="rF"></div>
+          <div class="x"><label>По</label><input type="date" id="rT"></div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-p" style="width:auto" onclick="rep()">Сформировать</button>
+          <button class="btn btn-g" style="width:auto" onclick="copyR()">Скопировать</button>
+        </div>
+        <div class="hint" id="rM"></div>
+      </div>
+      <div class="fc"><pre class="rp" id="rO">Нажми «Сформировать»</pre></div>
+    </section>
+
+    <!-- SECTION: ADMIN -->
+    <section class="sec" id="s-admin">
+      <div class="tit">Администрирование</div>
+      <div class="fc">
+        <h3>Создать пользователя</h3>
+        <div class="fr">
+          <div class="x"><label>Имя</label><input id="uN"></div>
+          <div class="x"><label>Фамилия</label><input id="uS"></div>
+          <div class="x"><label>Паспорт</label><input id="uP" maxlength="7"></div>
+        </div>
+        <div class="fr">
+          <div class="x"><label>Логин</label><input id="uL"></div>
+          <div class="x"><label>Пароль</label><input id="uW"></div>
+          <div class="x"><label>Роль</label><select id="uR"><option value="employee">Сотрудник</option><option value="senior">Старший состав</option><option value="admin">Администратор</option></select></div>
+        </div>
+        <button class="btn btn-p" style="width:auto" onclick="cUser()">Создать</button>
+        <div class="hint" id="uM"></div>
+      </div>
+      <div class="fc"><h3>Пользователи системы</h3><div id="uLi"></div></div>
+    </section>
+
+    <!-- SECTION: ACCOUNT -->
+    <section class="sec" id="s-account">
+      <div class="tit">Аккаунт и эффекты</div>
+      <div class="fc">
+        <h3>Эффекты интерфейса</h3>
+        <div class="fx-settings">
+          <div class="fx-row"><div class="fx-label">Звуки интерфейса<small>Мягкий звуковой отклик при кликах</small></div><button class="fx-toggle" id="fxSoundToggle" onclick="fxToggle('sound')"><i></i></button></div>
+          <div class="fx-row"><div class="fx-label">Громкость</div><input class="fx-range" id="fxVolume" type="range" min="0" max="100" value="35" oninput="fxSetVolume(this.value)"></div>
+          <div class="fx-row"><div class="fx-label">Фоновые частицы<small>Мягкая фоновая анимация</small></div><button class="fx-toggle" id="fxParticlesToggle" onclick="fxToggle('particles')"><i></i></button></div>
+          <div class="fx-row"><div class="fx-label">Анимации кнопок<small>Эффект нажатия на проверки</small></div><button class="fx-toggle" id="fxAnimToggle" onclick="fxToggle('animations')"><i></i></button></div>
+          <div class="fx-row"><div class="fx-label">Стиль анимации</div><select id="fxAnimStyle" onchange="fxSetStyle(this.value)" style="min-width:150px"><option value="pulse">Мягкое увеличение</option><option value="bounce">Лёгкий bounce</option><option value="glow">Подсветка</option><option value="lift">Подъём</option></select></div>
+        </div>
+      </div>
+      <div class="fc">
+        <h3>Личные данные</h3>
+        <div class="fr"><div class="x"><label>Имя</label><input id="cN"></div><div class="x"><label>Фамилия</label><input id="cS"></div><div class="x"><label>Паспорт</label><input id="cP" maxlength="7"></div></div>
+        <button class="btn btn-p" style="width:auto" onclick="saveA()">Сохранить</button>
+        <div class="hint" id="cM"></div>
+      </div>
+      <div class="fc">
+        <h3>Смена пароля</h3>
+        <div class="fr"><div class="x"><label>Новый пароль</label><input type="password" id="np1"></div><div class="x"><label>Повтор пароля</label><input type="password" id="np2"></div></div>
+        <button class="btn btn-p" style="width:auto" onclick="chP()">Сменить</button>
+        <div class="hint" id="pM"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- Modal: Edit Employee -->
+<div class="mbg" id="edM">
+  <div class="mod">
+    <h3>Редактировать сотрудника</h3>
+    <input type="hidden" id="eI"><input type="hidden" id="eFD">
+    <div class="fr"><div class="x"><label>Имя</label><input id="eN"></div><div class="x"><label>Фамилия</label><input id="eS"></div></div>
+    <div class="fr">
+      <div class="x"><label>Паспорт</label><input id="eP" maxlength="7"></div>
+      <div class="x"><label>Отдел</label><select id="eD" onchange="fillEditCats(this.value);togEG()"></select></div>
+    </div>
+    <div class="fr" id="eGR"><div class="x"><label>Категория</label><select id="eG"></select></div></div>
+    <div class="ma">
+      <button class="btn btn-d" onclick="resetFromEdit()">Сбросить ✓/✗</button>
+      <button class="btn btn-g" onclick="clsEd()">Отмена</button>
+      <button class="btn btn-p" style="width:auto" onclick="svEd()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ==========================================================================
+   КОНСТАНТЫ И СОСТОЯНИЕ
+   ========================================================================== */
+const DEPS = [
+  {id:'ruk',  name:'Руководящий состав'},
+  {id:'ab',   name:'АБ'},
+  {id:'orp',  name:'ОРП'},
+  {id:'otn',  name:'ОТН'},
+  {id:'bsmp', name:'БСМП'}
+];
+
+const CHK = [
+  {id:'passport',   label:'Паспорт'},
+  {id:'medknizhka', label:'Медкнижка'},
+  {id:'narko',      label:'Справка нарколога'},
+  {id:'prava',      label:'Водит. удостоверение'},
+  {id:'delo',       label:'Личное дело'}
+];
+
+const OTH = ['ab','orp','otn','bsmp'], MID='middle', SEN='senior';
+const RL = {admin:'Администратор', senior:'Старший состав', employee:'Сотрудник'};
+const DT = {
+  razgovor_admin: 'Разговор с администрацией больницы',
+  preduprezhdenie: 'Предупреждение',
+  vigovor: 'Выговор'
+};
+
+let data = {}, users = {}, me = null, tab = 'ruk', dTab = 'active', disc = {}, categories = {}, saveT, searchT;
+
+/* ==========================================================================
+   LOCAL STORAGE DATABASE (Замена Firebase на локальный режим)
+   ========================================================================== */
+const LS = {
+  get(key) {
+    try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch(e) { return null; }
+  },
+  set(key, val) {
+    try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
+  },
+  remove(key) {
+    try { localStorage.removeItem(key); } catch(e) {}
+  },
+  ref(path) {
+    return {
+      _path: path,
+      once() {
+        const parts = path.split('/');
+        const root = parts[0];
+        const sub = parts.slice(1);
+        let val = LS.get(root);
+        if (sub.length) {
+          sub.forEach(k => { val = (val && typeof val === 'object') ? val[k] : null; });
+        }
+        return Promise.resolve({ val() { return val; } });
+      },
+      set(val) {
+        const parts = path.split('/');
+        const root = parts[0];
+        const sub = parts.slice(1);
+        if (!sub.length) {
+          LS.set(root, val);
+        } else {
+          let obj = LS.get(root) || {};
+          let cur = obj;
+          for (let i = 0; i < sub.length - 1; i++) {
+            if (!cur[sub[i]]) cur[sub[i]] = {};
+            cur = cur[sub[i]];
+          }
+          cur[sub[sub.length - 1]] = val;
+          LS.set(root, obj);
+        }
+        return Promise.resolve();
+      },
+      update(val) {
+        const parts = path.split('/');
+        const root = parts[0];
+        const sub = parts.slice(1);
+        let obj = LS.get(root) || {};
+        let cur = obj;
+        if (sub.length) {
+          for (let i = 0; i < sub.length - 1; i++) {
+            if (!cur[sub[i]]) cur[sub[i]] = {};
+            cur = cur[sub[i]];
+          }
+          cur[sub[sub.length - 1]] = Object.assign(cur[sub[sub.length - 1]] || {}, val);
+        } else {
+          Object.assign(obj, val);
+        }
+        LS.set(root, obj);
+        return Promise.resolve();
+      },
+      remove() {
+        const parts = path.split('/');
+        const root = parts[0];
+        const sub = parts.slice(1);
+        if (!sub.length) {
+          LS.remove(root);
+        } else {
+          let obj = LS.get(root) || {};
+          let cur = obj;
+          for (let i = 0; i < sub.length - 1; i++) {
+            cur = cur[sub[i]] || {};
+          }
+          delete cur[sub[sub.length - 1]];
+          LS.set(root, obj);
+        }
+        return Promise.resolve();
+      },
+      on(ev, cb) {
+        this.once().then(s => cb(s));
+        return this;
+      }
+    };
+  }
+};
+
+const db = LS;
+
+/* ==========================================================================
+   УТИЛИТЫ
+   ========================================================================== */
+async function hash(p) {
+  const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(p));
+  return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join('');
+}
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+function esc(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+function fP(v) { const d = String(v).replace(/\D/g, '').slice(0, 6); return d.length <= 3 ? d : d.slice(0, 3) + '-' + d.slice(3); }
+function fD(i) { if (!i) return '—'; const p = i.split('-'); return p.length === 3 ? p[2] + '.' + p[1] + '.' + p[0] : i; }
+function err(id, t) { const e = document.getElementById(id); if (e) { e.textContent = t; e.classList.add('on'); } }
+function herr(id) { const e = document.getElementById(id); if (e) { e.textContent = ''; e.classList.remove('on'); } }
+function isAd() { return me && me.role === 'admin'; }
+function isSS() { return me && (me.role === 'senior' || me.role === 'admin'); }
+function who() { return me ? ((me.surname || '') + ' ' + (me.name || '')).trim() : ''; }
+function saveSes() {
+  LS.set('cgb_session', { id: me.id, login: me.login, name: me.name, surname: me.surname, role: me.role, passport: me.passport || '', avatar: me.avatar || '' });
+}
+function loadSes() { return LS.get('cgb_session'); }
+function st(ok, t) {
+  const el = document.getElementById('st');
+  if (el) el.innerHTML = '<span class="dot ' + (ok ? 'on' : 'off') + '"></span>' + esc(t);
+}
+
+/* ==========================================================================
+   АВТОРИЗАЦИЯ И ПОЛЬЗОВАТЕЛИ
+   ========================================================================== */
+async function bootAd() {
+  const passwordHash = await hash('makschinik11');
+  const id = 'u_admin_main';
+  const user = {
+    login: 'maksim-milonov-877-506',
+    passwordHash: passwordHash,
+    name: 'Максим',
+    surname: 'Милонов',
+    passport: '877-506',
+    role: 'admin',
+    active: true,
+    createdAt: Date.now(),
+    avatar: ''
+  };
+  await db.ref('cgb_users/' + id).set(user);
+  users[id] = user;
+}
+
+async function login() {
+  herr('lErr');
+  const loginInput = document.getElementById('lIn').value.trim().toLowerCase();
+  const pass = document.getElementById('pIn').value;
+  if (!loginInput || !pass) { err('lErr', 'Введите логин и пароль'); return; }
+
+  const btn = document.getElementById('lBtn');
+  btn.disabled = true;
+  btn.textContent = 'Вход...';
+
+  try {
+    const ph = await hash(pass);
+    const snap = await db.ref('cgb_users').once('value');
+    users = snap.val() || {};
+
+    let found = null, fid = null;
+    for (const [id, u] of Object.entries(users)) {
+      if ((u.login || '').toLowerCase() === loginInput && u.passwordHash === ph) {
+        found = u; fid = id; break;
+      }
+    }
+
+    if (!found && loginInput === 'maksim-milonov-877-506' && pass === 'makschinik11') {
+      await bootAd();
+      found = users.u_admin_main;
+      fid = 'u_admin_main';
+    }
+
+    if (!found) {
+      err('lErr', 'Неверный логин или пароль');
+      btn.disabled = false;
+      btn.textContent = 'Войти';
+      return;
+    }
+
+    if (found.active === false) {
+      err('lErr', 'Учетная запись отключена');
+      btn.disabled = false;
+      btn.textContent = 'Войти';
+      return;
+    }
+
+    me = { id: fid, login: found.login, name: found.name, surname: found.surname, role: found.role, passport: found.passport || '', avatar: found.avatar || '' };
+    saveSes();
+    btn.disabled = false;
+    btn.textContent = 'Войти';
+    openApp();
+  } catch(e) {
+    err('lErr', e.message);
+    btn.disabled = false;
+    btn.textContent = 'Войти';
+  }
+}
+
+function logout() {
+  me = null;
+  LS.remove('cgb_session');
+  clsMenu();
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login').style.display = 'flex';
+}
+
+function openApp() {
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+
+  document.getElementById('nA').style.display = isAd() ? 'flex' : 'none';
+  document.getElementById('nD').style.display = isSS() ? 'flex' : 'none';
+  document.getElementById('nR').style.display = isSS() ? 'flex' : 'none';
+  document.getElementById('dF').style.display = isSS() ? 'block' : 'none';
+
+  ensureCats();
+  fillDep();
+  fillG();
+  updAv();
+
+  document.getElementById('cN').value = me.name || '';
+  document.getElementById('cS').value = me.surname || '';
+  document.getElementById('cP').value = me.passport || '';
+
+  const to = new Date(), fr = new Date();
+  fr.setDate(fr.getDate() - 6);
+  const iso = d => d.toISOString().slice(0, 10);
+  document.getElementById('rF').value = iso(fr);
+  document.getElementById('rT').value = iso(to);
+
+  ensure();
+  load();
+
+  db.ref('cgb_categories').once('value').then(s => {
+    categories = s.val() || {};
+    ensureCats();
+    renderCats();
+    fillG();
+    fillCleanup();
+    render();
+  });
+
+  db.ref('cgb_disciplinary').once('value').then(s => {
+    disc = s.val() || {};
+    renD();
+  });
+
+  renTabs();
+  render();
+  if (isAd()) renU();
+  st(true, 'Локально (' + (me.name || me.login) + ')');
+}
+
+/* ==========================================================================
+   КАТЕГОРИИ
+   ========================================================================== */
+function ensureCats() {
+  DEPS.forEach(d => {
+    if (!Array.isArray(categories[d.id])) {
+      categories[d.id] = [];
+      // Инициализируем стандартные категории если пусто (кроме руководящего)
+      if (d.id !== 'ruk') {
+        categories[d.id] = [
+          { id: 'cat_sen_' + d.id, name: 'Старший состав', createdAt: Date.now() },
+          { id: 'cat_mid_' + d.id, name: 'Средний состав', createdAt: Date.now() + 1 }
+        ];
+      }
+    }
+  });
+}
+
+function getCats(dep) {
+  ensureCats();
+  return categories[dep] || [];
+}
+
+function catName(dep, e) {
+  if (e.categoryId) {
+    const c = getCats(dep).find(c => c.id === e.categoryId);
+    if (c) return c.name;
+  }
+  return e.groupId === SEN ? 'Старший состав' : (dep !== 'ruk' ? 'Средний состав' : '');
+}
+
+function fillDep() {
+  const s = document.getElementById('aD');
+  const L = isSS() ? DEPS : DEPS.filter(d => d.id !== 'ruk');
+  s.innerHTML = L.map(d => '<option value="' + d.id + '">' + esc(d.name) + '</option>').join('');
+  fillG();
+}
+
+function fillG() {
+  const dep = document.getElementById('aD').value;
+  const col = document.getElementById('aGCol');
+  const sel = document.getElementById('aG');
+
+  if (dep === 'ruk') {
+    col.style.display = 'none';
+    return;
+  }
+  col.style.display = 'flex';
+  const cats = getCats(dep);
+
+  if (cats.length) {
+    sel.innerHTML = cats.map(c => '<option value="' + esc(c.id) + '">' + esc(c.name) + '</option>').join('');
+  } else {
+    sel.innerHTML = '<option value="">Без категории</option>';
+  }
+}
+
+function renderCats() {
+  const bar = document.getElementById('catBar');
+  const chips = document.getElementById('catChips');
+  if (!bar || !chips) return;
+
+  const allowed = (tab !== 'ruk');
+  bar.style.display = allowed ? 'flex' : 'none';
+  if (!allowed) { chips.innerHTML = ''; return; }
+
+  const cats = getCats(tab);
+  if (!cats.length) {
+    chips.innerHTML = '<span class="hint">Категорий нет. Создайте первую!</span>';
+    return;
+  }
+
+  chips.innerHTML = cats.map((c, idx) => {
+    const cnt = (data[tab] || []).filter(e => e.categoryId === c.id).length;
+    let btns = '';
+    if (isSS()) {
+      btns = '<button class="chip-btn" title="Переименовать" onclick="renameCat(\'' + c.id + '\')">✏️</button>' +
+             '<button class="chip-btn" title="Удалить" onclick="deleteCat(\'' + c.id + '\')">✕</button>';
+    }
+    return '<span class="cat-chip">' + esc(c.name) + ' (' + cnt + ') ' + btns + '</span>';
+  }).join('');
+}
+
+function createCat() {
+  if (tab === 'ruk') return;
+  const name = prompt('Введите название новой категории:');
+  if (!name || !name.trim()) return;
+
+  const cats = getCats(tab);
+  if (cats.some(c => c.name.trim().toLowerCase() === name.trim().toLowerCase())) {
+    alert('Категория с таким названием уже существует!');
+    return;
+  }
+
+  const c = { id: 'cat_' + uid(), name: name.trim(), createdAt: Date.now() };
+  cats.push(c);
+  db.ref('cgb_categories/' + tab).set(cats).then(() => {
+    renderCats();
+    fillG();
+    fillCleanup();
+    render();
+  });
+}
+
+function renameCat(id) {
+  if (!isSS()) return;
+  const c = getCats(tab).find(x => x.id === id);
+  if (!c) return;
+
+  const name = prompt('Новое название категории:', c.name);
+  if (!name || !name.trim()) return;
+  if (getCats(tab).some(x => x.id !== id && x.name.trim().toLowerCase() === name.trim().toLowerCase())) {
+    alert('Такая категория уже есть!');
+    return;
+  }
+
+  c.name = name.trim();
+  db.ref('cgb_categories/' + tab).set(getCats(tab)).then(() => {
+    renderCats();
+    fillG();
+    fillCleanup();
+    render();
+  });
+}
+
+function deleteCat(id) {
+  if (!isSS()) return;
+  const c = getCats(tab).find(x => x.id === id);
+  if (!c) return;
+
+  if (!confirm('Удалить категорию «' + c.name + '»? Сотрудники останутся без категории.')) return;
+  (data[tab] || []).forEach(e => {
+    if (e.categoryId === id) e.categoryId = null;
+  });
+
+  categories[tab] = getCats(tab).filter(x => x.id !== id);
+  Promise.all([
+    db.ref('cgb_categories/' + tab).set(categories[tab]),
+    db.ref('cgb_proverki').set(data)
+  ]).then(() => {
+    renderCats();
+    fillG();
+    fillCleanup();
+    render();
+  });
+}
+
+/* ==========================================================================
+   ДАННЫЕ ПРОВЕРОК
+   ========================================================================== */
+function ensure() {
+  DEPS.forEach(d => {
+    if (!Array.isArray(data[d.id])) data[d.id] = [];
+  });
+  DEPS.forEach(d => {
+    (data[d.id] || []).forEach(e => {
+      if (!e.checks) e.checks = {};
+      CHK.forEach(c => {
+        if (e.checks[c.id] === undefined) e.checks[c.id] = '';
+      });
+      if (e.groupId === undefined) e.groupId = null;
+      if (e.categoryId === undefined || String(e.categoryId).startsWith('__legacy_')) e.categoryId = null;
+    });
+  });
+}
+
+function sched() {
+  clearTimeout(saveT);
+  saveT = setTimeout(() => {
+    ensure();
+    db.ref('cgb_proverki').set(data).then(() => st(true, 'Сохранено локально')).catch(() => st(false, 'Ошибка сохранения'));
+  }, 350);
+}
+
+function load() {
+  db.ref('cgb_proverki').once('value').then(s => {
+    data = s.val() || {};
+    ensure();
+    render();
+  });
+}
+
+function isCh(e) {
+  return CHK.some(c => e.checks[c.id] === 'ok' || e.checks[c.id] === 'bad');
+}
+
+function locked(e) {
+  if (isSS()) return false;
+  const w = (e.checkedBy || '').trim(), i = who();
+  if (!isCh(e) && !w) return false;
+  if (!i) return true;
+  return !(w && w === i);
+}
+
+function stamp(e) {
+  const i = who();
+  if (i) e.checkedBy = i;
+}
+
+function pk(e) {
+  return (e.surname || '').toLowerCase().trim() + '|' + (e.passport || '').trim();
+}
+
+function sync(dep, emp) {
+  const k = pk(emp);
+  if (!k || k === '|') return;
+  if (dep !== 'ruk') {
+    const m = (data.ruk || []).find(x => pk(x) === k);
+    if (m) {
+      m.checks = JSON.parse(JSON.stringify(emp.checks));
+      m.checkedBy = emp.checkedBy || '';
+    }
+  } else {
+    OTH.forEach(d => {
+      const m = (data[d] || []).find(x => pk(x) === k);
+      if (m) {
+        m.checks = JSON.parse(JSON.stringify(emp.checks));
+        m.checkedBy = emp.checkedBy || '';
+      }
+    });
+  }
+}
+
+/* ==========================================================================
+   ОТРИСОВКА ВКЛАДОК И СПИСКА
+   ========================================================================== */
+function renTabs() {
+  document.getElementById('tabs').innerHTML = DEPS.map(d =>
+    '<button class="tab ' + (tab === d.id ? 'a' : '') + '" onclick="setTab(\'' + d.id + '\')">' + esc(d.name) + '</button>'
+  ).join('');
+}
+
+function setTab(id) {
+  tab = id;
+  renTabs();
+  renderCats();
+  fillG();
+  render();
+}
+
+function syncOnly(v) {
+  document.getElementById('oU').checked = v;
+  document.getElementById('oU2').checked = v;
+  render();
+}
+
+function render() {
+  ensure();
+  const only = document.getElementById('oU').checked;
+  let list = (data[tab] || []).slice();
+  if (only) list = list.filter(e => !isCh(e));
+
+  let h = '';
+  if (tab !== 'ruk' && list.length) {
+    const cats = getCats(tab);
+    const buckets = [];
+    const used = new Set();
+
+    cats.forEach((c, cIdx) => {
+      const arr = list.filter(e => e.categoryId === c.id);
+      if (arr.length) {
+        buckets.push({ c: c, arr: arr, idx: cIdx });
+        arr.forEach(e => used.add(e.id));
+      }
+    });
+
+    const rest = list.filter(e => !used.has(e.id));
+    if (rest.length) {
+      buckets.push({ c: { id: '__none', name: 'Без категории' }, arr: rest, idx: -1 });
+    }
+
+    buckets.forEach(b => {
+      const hueClass = b.idx >= 0 ? ('hue-' + (b.idx % 4)) : 'hue-none';
+      let catActions = '';
+      if (isSS() && b.c.id !== '__none') {
+        catActions = '<div class="cat-actions">' +
+          '<button class="btn btn-g btn-sm" style="padding:2px 8px;font-size:.75rem" onclick="renameCat(\'' + b.c.id + '\')">✏️ Изменить</button>' +
+          '<button class="btn btn-d btn-sm" style="padding:2px 8px;font-size:.75rem" onclick="deleteCat(\'' + b.c.id + '\')">✕ Удалить</button>' +
+        '</div>';
+      }
+      h += '<div class="cat-group">' +
+             '<div class="cat-header ' + hueClass + '">' +
+               '<div class="cat-title">' +
+                 '<span>' + esc(b.c.name) + '</span>' +
+                 '<span class="cat-count">' + b.arr.length + ' чел.</span>' +
+               '</div>' +
+               catActions +
+             '</div>' +
+             b.arr.map((e, i) => card(tab, e, i, b.arr.length)).join('') +
+           '</div>';
+    });
+  } else if (list.length) {
+    h = list.map((e, i) => card(tab, e, i, list.length)).join('');
+  } else {
+    h = '<div class="empty">' + (only ? 'Нет непроверенных сотрудников в этом отделе' : 'Пока нет ни одного сотрудника в этом отделе') + '</div>';
+  }
+
+  document.getElementById('list').innerHTML = h;
+}
+
+/* Карточка сотрудника с 5 ровными столбцами проверок */
+function card(dep, e, idx, tot) {
+  const loc = locked(e);
+
+  const ch = CHK.map(c => {
+    const st = e.checks[c.id] || '';
+    const cl = st === 'ok' ? 'ok' : (st === 'bad' ? 'bad' : '');
+    const ic = st === 'ok' ? '✓' : (st === 'bad' ? '✗' : '–');
+    const title = st === 'ok' ? 'Пройдено' : (st === 'bad' ? 'Не пройдено' : 'Не проверено');
+
+    if (loc) {
+      return '<div class="ck">' +
+               '<span class="ck-label">' + esc(c.label) + '</span>' +
+               '<button class="sb ' + cl + '" disabled title="' + title + '">' + ic + '</button>' +
+             '</div>';
+    }
+    return '<div class="ck">' +
+             '<span class="ck-label">' + esc(c.label) + '</span>' +
+             '<button class="sb ' + cl + '" title="' + title + '" onclick="tog(\'' + dep + '\',\'' + e.id + '\',\'' + c.id + '\')">' + ic + '</button>' +
+           '</div>';
+  }).join('');
+
+  let actsTop = '', actsBot = '';
+  if (!loc) {
+    actsTop = '<div class="acts-row">' +
+      '<button class="btn btn-s btn-sm" onclick="setAll(\'' + dep + '\',\'' + e.id + '\',\'ok\')">Все ✓</button>' +
+      '<button class="btn btn-d btn-sm" onclick="setAll(\'' + dep + '\',\'' + e.id + '\',\'bad\')">Все ✗</button>' +
+    '</div>';
+  }
+  if (isSS()) {
+    actsBot = '<div class="acts-row">' +
+      '<button class="btn btn-g btn-sm" title="Редактировать" onclick="opEd(\'' + dep + '\',\'' + e.id + '\')">✏️</button>' +
+      '<button class="btn btn-g btn-sm" title="Переместить вверх" onclick="mov(\'' + dep + '\',\'' + e.id + '\',-1)"' + (idx === 0 ? ' disabled' : '') + '>↑</button>' +
+      '<button class="btn btn-g btn-sm" title="Переместить вниз" onclick="mov(\'' + dep + '\',\'' + e.id + '\',1)"' + (idx >= tot - 1 ? ' disabled' : '') + '>↓</button>' +
+      '<button class="btn btn-d btn-sm" title="Удалить" onclick="delE(\'' + dep + '\',\'' + e.id + '\')">🗑</button>' +
+    '</div>';
+  }
+
+  const gl = catName(dep, e);
+
+  return '<div class="card" id="c-' + e.id + '">' +
+           '<div class="card-top">' +
+             '<div class="card-info">' +
+               '<div class="card-name-row">' +
+                 '<span class="nm">' + esc(e.name) + ' ' + esc(e.surname) + '</span>' +
+                 '<span class="ps">' + esc(e.passport) + '</span>' +
+                 (gl ? '<span class="gl-tag">' + esc(gl) + '</span>' : '') +
+               '</div>' +
+               '<div class="card-meta">' +
+                 (e.checkedBy ? '<span class="mt">Проверил: ' + esc(e.checkedBy) + '</span>' : '<span style="color:var(--muted)">Не проверен</span>') +
+               '</div>' +
+             '</div>' +
+             '<div class="card-actions">' +
+               actsTop +
+               actsBot +
+             '</div>' +
+           '</div>' +
+           '<div class="cks">' + ch + '</div>' +
+         '</div>';
+}
+
+/* ==========================================================================
+   ДЕЙСТВИЯ С СОТРУДНИКАМИ
+   ========================================================================== */
+function addE() {
+  if (!me) return;
+  const name = document.getElementById('aN').value.trim();
+  const sur = document.getElementById('aS').value.trim();
+  const pass = fP(document.getElementById('aP').value.trim());
+  const dep = document.getElementById('aD').value;
+
+  if (!name || !sur || !pass || pass.length < 7) {
+    alert('Заполните корректно Имя, Фамилию и номер Паспорта (6 цифр)');
+    return;
+  }
+  if (!isSS() && dep === 'ruk') {
+    alert('Добавление в руководящий состав доступно только старшему составу');
+    return;
+  }
+
+  let categoryId = null, gid = null;
+  if (dep !== 'ruk') {
+    categoryId = document.getElementById('aG').value || null;
+    const c = getCats(dep).find(x => x.id === categoryId);
+    gid = (c && c.name.toLowerCase().includes('старший')) ? SEN : MID;
+  }
+
+  if (!data[dep]) data[dep] = [];
+  data[dep].push({
+    id: uid(),
+    name: name,
+    surname: sur,
+    passport: pass,
+    checkedBy: '',
+    groupId: gid,
+    categoryId: categoryId,
+    checks: { passport: '', medknizhka: '', narko: '', prava: '', delo: '' }
+  });
+
+  document.getElementById('aN').value = '';
+  document.getElementById('aS').value = '';
+  document.getElementById('aP').value = '';
+
+  if (tab !== dep) setTab(dep);
+  else render();
+  sched();
+  fxBeep('ok');
+}
+
+function tog(dep, id, cid) {
+  const e = (data[dep] || []).find(x => x.id === id);
+  if (!e || locked(e)) return;
+
+  const c = e.checks[cid] || '';
+  e.checks[cid] = (c === '' ? 'ok' : (c === 'ok' ? 'bad' : ''));
+
+  fxBeep(e.checks[cid] === 'ok' ? 'ok' : (e.checks[cid] === 'bad' ? 'bad' : 'tap'));
+  if (isCh(e)) stamp(e); else e.checkedBy = '';
+  sync(dep, e);
+  render();
+
+  setTimeout(() => {
+    document.querySelectorAll('#c-' + id + ' .sb').forEach(b => fxPulse(b));
+  }, 0);
+  sched();
+}
+
+function setAll(dep, id, stVal) {
+  const e = (data[dep] || []).find(x => x.id === id);
+  if (!e || locked(e)) return;
+
+  CHK.forEach(c => e.checks[c.id] = stVal);
+  for (let z = 0; z < CHK.length; z++) {
+    setTimeout(() => fxBeep(stVal === 'ok' ? 'ok' : (stVal === 'bad' ? 'bad' : 'tap')), z * 40);
+  }
+
+  if (stVal === '') e.checkedBy = ''; else stamp(e);
+  sync(dep, e);
+  render();
+
+  setTimeout(() => {
+    document.querySelectorAll('#c-' + id + ' .sb').forEach(b => fxPulse(b));
+  }, 0);
+  sched();
+}
+
+function mov(dep, id, dir) {
+  if (!isSS()) return;
+  const L = data[dep] || [];
+  const i = L.findIndex(x => x.id === id);
+  const j = i + dir;
+  if (i < 0 || j < 0 || j >= L.length) return;
+
+  [L[i], L[j]] = [L[j], L[i]];
+  render();
+  sched();
+}
+
+function delE(dep, id) {
+  if (!isSS()) return;
+  if (!confirm('Удалить сотрудника из списка?')) return;
+  data[dep] = (data[dep] || []).filter(x => x.id !== id);
+  render();
+  sched();
+}
+
+/* ==========================================================================
+   МОДАЛЬНОЕ ОКНО РЕДАКТИРОВАНИЯ
+   ========================================================================== */
+function fillEditCats(dep) {
+  const s = document.getElementById('eG');
+  if (dep === 'ruk') { s.innerHTML = ''; return; }
+  const cats = getCats(dep);
+  s.innerHTML = cats.length ? cats.map(c => '<option value="' + esc(c.id) + '">' + esc(c.name) + '</option>').join('') : '<option value="">Без категории</option>';
+}
+
+function opEd(dep, id) {
+  const e = (data[dep] || []).find(x => x.id === id);
+  if (!e) return;
+  document.getElementById('eI').value = id;
+  document.getElementById('eFD').value = dep;
+  document.getElementById('eN').value = e.name || '';
+  document.getElementById('eS').value = e.surname || '';
+  document.getElementById('eP').value = e.passport || '';
+
+  const depSel = document.getElementById('eD');
+  depSel.innerHTML = DEPS.map(d => '<option value="' + d.id + '"' + (d.id === dep ? ' selected' : '') + '>' + esc(d.name) + '</option>').join('');
+
+  fillEditCats(dep);
+  document.getElementById('eG').value = e.categoryId || '';
+  togEG();
+  document.getElementById('edM').classList.add('open');
+}
+
+function clsEd() {
+  document.getElementById('edM').classList.remove('open');
+}
+
+function resetFromEdit() {
+  if (!isSS()) return;
+  const id = document.getElementById('eI').value;
+  const dep = document.getElementById('eFD').value;
+  if (!id || !dep) return;
+  const e = (data[dep] || []).find(x => x.id === id);
+  if (!e) return;
+
+  if (!confirm('Сбросить отметки всех проверок для этого сотрудника?')) return;
+  e.checks = {};
+  CHK.forEach(c => e.checks[c.id] = '');
+  e.checkedBy = '';
+  sync(dep, e);
+  render();
+  sched();
+  clsEd();
+  fxBeep('tap');
+}
+
+function togEG() {
+  document.getElementById('eGR').style.display = document.getElementById('eD').value === 'ruk' ? 'none' : 'flex';
+}
+
+function svEd() {
+  const id = document.getElementById('eI').value;
+  const from = document.getElementById('eFD').value;
+  const name = document.getElementById('eN').value.trim();
+  const sur = document.getElementById('eS').value.trim();
+  const pass = fP(document.getElementById('eP').value.trim());
+  const to = document.getElementById('eD').value;
+  const categoryId = document.getElementById('eG').value;
+
+  if (!name || !sur || !pass || pass.length < 7) {
+    alert('Заполните корректно имя, фамилию и паспорт');
+    return;
+  }
+
+  const L = data[from] || [];
+  const i = L.findIndex(x => x.id === id);
+  if (i < 0) return;
+  const e = L[i];
+
+  e.name = name;
+  e.surname = sur;
+  e.passport = pass;
+  e.categoryId = (to === 'ruk') ? null : (categoryId || null);
+  const cc = getCats(to).find(c => c.id === categoryId);
+  e.groupId = (to === 'ruk') ? null : (cc && cc.name.toLowerCase().includes('старший') ? SEN : MID);
+
+  if (from !== to) {
+    L.splice(i, 1);
+    if (!data[to]) data[to] = [];
+    data[to].push(e);
+    if (tab !== to) setTab(to);
+    else render();
+  } else {
+    render();
+  }
+
+  sched();
+  clsEd();
+}
+
+/* ==========================================================================
+   ОЧИСТКА ПРОВЕРОК
+   ========================================================================== */
+function fillCleanup() {
+  const d = document.getElementById('clDep');
+  const c = document.getElementById('clCat');
+  if (!d || !c) return;
+
+  const prev = d.value;
+  const L = isSS() ? DEPS : DEPS.filter(x => x.id !== 'ruk');
+  d.innerHTML = L.map(x => '<option value="' + x.id + '">' + esc(x.name) + '</option>').join('');
+  if (L.some(x => x.id === prev)) d.value = prev;
+
+  const dep = d.value;
+  let opts = '<option value="__all__">Весь отдел (' + ((data[dep] || []).length) + ')</option>';
+  if (dep !== 'ruk') {
+    getCats(dep).forEach(x => {
+      const cnt = (data[dep] || []).filter(e => e.categoryId === x.id).length;
+      opts += '<option value="' + esc(x.id) + '">' + esc(x.name) + ' (' + cnt + ')</option>';
+    });
+  }
+  c.innerHTML = opts;
+}
+
+async function clearChecks() {
+  if (!isSS()) return;
+  const dep = document.getElementById('clDep').value;
+  const cat = document.getElementById('clCat').value;
+  const targets = (data[dep] || []).filter(e => cat === '__all__' || e.categoryId === cat);
+
+  if (!targets.length) {
+    document.getElementById('clM').textContent = 'Нет сотрудников для очистки';
+    return;
+  }
+  if (!confirm('Очистить результаты проверок у ' + targets.length + ' сотрудников?')) return;
+
+  targets.forEach(e => {
+    e.checks = {};
+    CHK.forEach(x => e.checks[x.id] = '');
+    e.checkedBy = '';
+  });
+
+  syncCleanupMirror(dep, targets);
+  await db.ref('cgb_proverki').set(data);
+  render();
+  fillCleanup();
+  document.getElementById('clM').textContent = 'Проверки успешно сброшены (' + targets.length + ' чел.)';
+  document.getElementById('clM').style.color = 'var(--green)';
+}
+
+function syncCleanupMirror(dep, targets) {
+  targets.forEach(e => {
+    const k = pk(e);
+    if (!k || k === '|') return;
+    if (dep !== 'ruk') {
+      const m = (data.ruk || []).find(x => pk(x) === k);
+      if (m) {
+        m.checks = JSON.parse(JSON.stringify(e.checks));
+        m.checkedBy = '';
+      }
+    } else {
+      OTH.forEach(d => (data[d] || []).filter(x => pk(x) === k).forEach(m => {
+        m.checks = JSON.parse(JSON.stringify(e.checks));
+        m.checkedBy = '';
+      }));
+    }
+  });
+}
+
+/* ==========================================================================
+   ПОИСК
+   ========================================================================== */
+function search() {
+  clearTimeout(searchT);
+  searchT = setTimeout(() => {
+    const q = document.getElementById('sIn').value.trim().toLowerCase();
+    const box = document.getElementById('sR');
+    if (q.length < 2) {
+      box.classList.remove('on');
+      box.innerHTML = '';
+      return;
+    }
+    const res = [];
+    DEPS.forEach(d => {
+      (data[d.id] || []).forEach(e => {
+        const f = ((e.name || '') + ' ' + (e.surname || '')).toLowerCase();
+        if (f.includes(q) || (e.passport || '').toLowerCase().includes(q)) {
+          res.push({ d: d, e: e });
+        }
+      });
+    });
+
+    if (!res.length) {
+      box.innerHTML = '<div class="si" style="color:var(--muted)">Ничего не найдено</div>';
+      box.classList.add('on');
+      return;
+    }
+
+    box.innerHTML = res.slice(0, 15).map(r =>
+      '<div class="si" onclick="jump(\'' + r.d.id + '\',\'' + r.e.id + '\')">' +
+        '<strong>' + esc(r.e.name) + ' ' + esc(r.e.surname) + '</strong> · ' + esc(r.e.passport) +
+        ' <span class="hint">(' + esc(r.d.name) + ')</span>' +
+      '</div>'
+    ).join('');
+    box.classList.add('on');
+  }, 200);
+}
+
+function clrS() {
+  document.getElementById('sIn').value = '';
+  document.getElementById('sR').classList.remove('on');
+}
+
+function jump(dep, id) {
+  document.getElementById('oU').checked = false;
+  document.getElementById('oU2').checked = false;
+  setTab(dep);
+  setTimeout(() => {
+    const el = document.getElementById('c-' + id);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.classList.add('hi');
+      setTimeout(() => el.classList.remove('hi'), 2500);
+    }
+    document.getElementById('sR').classList.remove('on');
+  }, 60);
+}
+
+/* ==========================================================================
+   ДИСЦИПЛИНАРНЫЕ ВЗЫСКАНИЯ
+   ========================================================================== */
+function setDT(t) {
+  dTab = t;
+  document.getElementById('dtA').classList.toggle('a', t === 'active');
+  document.getElementById('dtR').classList.toggle('a', t === 'archive');
+  renD();
+}
+
+async function addD() {
+  if (!isSS()) return;
+  const name = document.getElementById('dN').value.trim();
+  const sur = document.getElementById('dS').value.trim();
+  const pass = fP(document.getElementById('dP').value.trim());
+  const type = document.getElementById('dT').value;
+  const fr = document.getElementById('dFr').value;
+  const to = document.getElementById('dTo').value;
+  const note = document.getElementById('dNo').value.trim();
+  const msg = document.getElementById('dM');
+
+  if (!name || !sur || !pass || pass.length < 7) {
+    msg.textContent = 'Заполните ФИО и корректный номер паспорта';
+    msg.style.color = 'var(--red)';
+    return;
+  }
+  if (!fr || !to) {
+    msg.textContent = 'Укажите период действия';
+    msg.style.color = 'var(--red)';
+    return;
+  }
+  if (to < fr) {
+    msg.textContent = 'Дата окончания не может быть раньше начала';
+    msg.style.color = 'var(--red)';
+    return;
+  }
+
+  const id = 'd_' + uid();
+  const item = {
+    id: id,
+    name: name,
+    surname: sur,
+    passport: pass,
+    type: type,
+    dateFrom: fr,
+    dateTo: to,
+    note: note,
+    status: 'active',
+    createdBy: who(),
+    createdAt: Date.now()
+  };
+
+  try {
+    await db.ref('cgb_disciplinary/' + id).set(item);
+    disc[id] = item;
+    ['dN', 'dS', 'dP', 'dNo', 'dFr', 'dTo'].forEach(i => document.getElementById(i).value = '');
+    msg.textContent = 'Взыскание успешно сохранено';
+    msg.style.color = 'var(--green)';
+    setDT('active');
+  } catch(e) {
+    msg.textContent = e.message;
+    msg.style.color = 'var(--red)';
+  }
+}
+
+function renD() {
+  const box = document.getElementById('dL');
+  if (!box) return;
+
+  const q = (document.getElementById('dSe')?.value || '').trim().toLowerCase();
+  const today = new Date().toISOString().slice(0, 10);
+
+  let list = Object.values(disc || {}).map(x => {
+    if (x.status === 'active' && x.dateTo && x.dateTo < today) return { ...x, status: 'archive' };
+    return x;
+  }).filter(x => {
+    const st = x.status || 'active';
+    if (dTab === 'active' && st !== 'active') return false;
+    if (dTab === 'archive' && st === 'active') return false;
+    if (q) {
+      const f = ((x.name || '') + ' ' + (x.surname || '')).toLowerCase();
+      if (!f.includes(q) && !(x.passport || '').toLowerCase().includes(q)) return false;
+    }
+    return true;
+  }).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+  if (!list.length) {
+    box.innerHTML = '<div class="empty">' + (dTab === 'active' ? 'Нет активных взысканий' : 'Архив пуст') + '</div>';
+    return;
+  }
+
+  box.innerHTML = list.map(x => {
+    const bc = x.type === 'vigovor' ? 'dv' : (x.type === 'preduprezhdenie' ? 'dp' : 'dr');
+    let act = '';
+    if (isSS()) {
+      if ((x.status || 'active') === 'active') {
+        act = '<button class="btn btn-g btn-sm" onclick="archD(\'' + x.id + '\')">В архив</button> ' +
+              '<button class="btn btn-d btn-sm" onclick="delD(\'' + x.id + '\')">Удалить</button>';
+      } else {
+        act = '<button class="btn btn-g btn-sm" onclick="actD(\'' + x.id + '\')">Вернуть</button> ' +
+              '<button class="btn btn-d btn-sm" onclick="delD(\'' + x.id + '\')">Удалить</button>';
+      }
+    }
+    return '<div class="card">' +
+             '<div class="card-top">' +
+               '<div>' +
+                 '<div class="nm">' + esc(x.name) + ' ' + esc(x.surname) + '</div>' +
+                 '<div class="ps">' + esc(x.passport) + '</div>' +
+                 '<div style="margin-top:6px"><span class="db ' + bc + '">' + esc(DT[x.type] || x.type) + '</span></div>' +
+                 '<div class="hint">Срок: ' + fD(x.dateFrom) + ' — ' + fD(x.dateTo) + '</div>' +
+                 (x.note ? '<div class="hint" style="color:#e2e8f0;margin-top:2px">' + esc(x.note) + '</div>' : '') +
+                 '<div class="hint">Выдал: ' + esc(x.createdBy || '—') + '</div>' +
+               '</div>' +
+               '<div class="acts-row">' + act + '</div>' +
+             '</div>' +
+           '</div>';
+  }).join('');
+}
+
+async function archD(id) {
+  await db.ref('cgb_disciplinary/' + id + '/status').set('archive');
+  if (disc[id]) disc[id].status = 'archive';
+  renD();
+}
+
+async function actD(id) {
+  await db.ref('cgb_disciplinary/' + id + '/status').set('active');
+  if (disc[id]) disc[id].status = 'active';
+  renD();
+}
+
+async function delD(id) {
+  if (!confirm('Удалить запись о взыскании?')) return;
+  await db.ref('cgb_disciplinary/' + id).remove();
+  delete disc[id];
+  renD();
+}
+
+/* ==========================================================================
+   ИТОГОВЫЙ ОТЧЁТ
+   ========================================================================== */
+function rep() {
+  if (!isSS()) return;
+  ensure();
+  const fromS = fD(document.getElementById('rF').value);
+  const toS = fD(document.getElementById('rT').value);
+  const now = new Date();
+  const formed = String(now.getDate()).padStart(2, '0') + '.' +
+                 String(now.getMonth() + 1).padStart(2, '0') + '.' +
+                 now.getFullYear() + ', ' +
+                 String(now.getHours()).padStart(2, '0') + ':' +
+                 String(now.getMinutes()).padStart(2, '0') + ':' +
+                 String(now.getSeconds()).padStart(2, '0');
+
+  let checked = 0;
+  const problems = [], byWho = {};
+
+  DEPS.forEach(d => {
+    (data[d.id] || []).forEach(e => {
+      if (!isCh(e)) return;
+      checked++;
+      const w = (e.checkedBy || '').trim() || 'Не указан';
+      byWho[w] = (byWho[w] || 0) + 1;
+
+      const bad = CHK.filter(c => e.checks[c.id] === 'bad').map(c => c.label);
+      if (bad.length) {
+        problems.push({ name: e.name, surname: e.surname, passport: e.passport, dep: d.name, bad: bad });
+      }
+    });
+  });
+
+  const uniq = {};
+  problems.forEach(p => {
+    const k = (p.surname + '|' + p.passport).toLowerCase();
+    if (!uniq[k]) uniq[k] = p;
+    else uniq[k].bad = [...new Set([...uniq[k].bad, ...p.bad])];
+  });
+  const up = Object.values(uniq);
+
+  let t = '═══════════════════════════════════════\n' +
+          '  ОТЧЁТ ПО ПРОВЕРКАМ ЛИЧНОГО СОСТАВА ЦГБ\n' +
+          '  Период: ' + fromS + ' — ' + toS + '\n' +
+          '  Дата формирования: ' + formed + '\n' +
+          '═══════════════════════════════════════\n\n' +
+          '═══════════════════════════════════════\n' +
+          '  ИТОГОВАЯ СВОДКА\n' +
+          '═══════════════════════════════════════\n' +
+          'Проверено сотрудников: ' + checked + '\n' +
+          'Выявлено замечаний: ' + up.length + '\n\n';
+
+  if (up.length) {
+    t += 'Список замечаний:\n';
+    up.forEach((p, i) => {
+      t += '  ' + (i + 1) + '. ' + p.surname + ' ' + p.name + ' | ' + p.passport + ' (' + p.dep + ')\n' +
+           '     Не пройдено: ' + p.bad.join(', ') + '\n';
+    });
+    t += '\n';
+  } else {
+    t += 'Все проверки пройдены успешно, нарушений не выявлено.\n\n';
+  }
+
+  t += '═══════════════════════════════════════\n' +
+       '  СВОДКА ПО ПРОВЕРЯЮЩИМ\n' +
+       '═══════════════════════════════════════\n';
+
+  const ins = Object.entries(byWho).sort((a, b) => b[1] - a[1]);
+  if (ins.length) {
+    ins.forEach(([n, c]) => { t += '  ' + n + ' — ' + c + ' провер.\n'; });
+  } else {
+    t += '  Нет данных о проверяющих\n';
+  }
+
+  t += '\n───────────────────────────────────────\n';
+  document.getElementById('rO').textContent = t;
+  document.getElementById('rM').textContent = 'Отчёт успешно сформирован';
+  document.getElementById('rM').style.color = 'var(--green)';
+}
+
+async function copyR() {
+  const t = document.getElementById('rO').textContent || '';
+  const msg = document.getElementById('rM');
+  if (!t || t === 'Нажми «Сформировать»') {
+    msg.textContent = 'Сначала сформируйте отчёт';
+    msg.style.color = 'var(--red)';
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(t);
+    msg.textContent = 'Скопировано в буфер обмена';
+    msg.style.color = 'var(--green)';
+  } catch(e) {
+    const ta = document.createElement('textarea');
+    ta.value = t;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    msg.textContent = 'Скопировано в буфер обмена';
+    msg.style.color = 'var(--green)';
+  }
+}
+
+/* ==========================================================================
+   АДМИНИСТРИРОВАНИЕ ПОЛЬЗОВАТЕЛЕЙ
+   ========================================================================== */
+async function cUser() {
+  if (!isAd()) return;
+  const name = document.getElementById('uN').value.trim();
+  const sur = document.getElementById('uS').value.trim();
+  const pass = fP(document.getElementById('uP').value.trim());
+  const loginVal = document.getElementById('uL').value.trim().toLowerCase();
+  const pwd = document.getElementById('uW').value;
+  const role = document.getElementById('uR').value;
+  const msg = document.getElementById('uM');
+
+  if (!name || !sur || !loginVal || !pwd) {
+    msg.textContent = 'Заполните обязательные поля (Имя, Фамилия, Логин, Пароль)';
+    msg.style.color = 'var(--red)';
+    return;
+  }
+
+  for (const u of Object.values(users)) {
+    if ((u.login || '').toLowerCase() === loginVal) {
+      msg.textContent = 'Этот логин уже занят';
+      msg.style.color = 'var(--red)';
+      return;
+    }
+  }
+
+  try {
+    const ph = await hash(pwd);
+    const id = 'u_' + uid();
+    const user = {
+      login: loginVal,
+      passwordHash: ph,
+      name: name,
+      surname: sur,
+      passport: pass,
+      role: role,
+      active: true,
+      createdAt: Date.now(),
+      avatar: ''
+    };
+    await db.ref('cgb_users/' + id).set(user);
+    users[id] = user;
+    msg.textContent = 'Пользователь успешно создан';
+    msg.style.color = 'var(--green)';
+    ['uN', 'uS', 'uP', 'uL', 'uW'].forEach(i => document.getElementById(i).value = '');
+    renU();
+  } catch(e) {
+    msg.textContent = e.message;
+    msg.style.color = 'var(--red)';
+  }
+}
+
+function renU() {
+  const box = document.getElementById('uLi');
+  if (!box) return;
+  const en = Object.entries(users);
+  if (!en.length) {
+    box.innerHTML = '<div class="empty">Нет зарегистрированных пользователей</div>';
+    return;
+  }
+
+  box.innerHTML = en.map(([id, u]) =>
+    '<div class="card">' +
+      '<div class="card-top">' +
+        '<div>' +
+          '<div class="nm">' + esc(u.name) + ' ' + esc(u.surname) + '</div>' +
+          '<div class="hint">' + esc(u.login) + ' · ' + esc(u.passport || '—') + ' · ' +
+            '<span class="badge ' + (u.role === 'admin' ? 'ra' : (u.role === 'senior' ? 'rs' : 're')) + '">' +
+              esc(RL[u.role] || u.role) +
+            '</span>' +
+            (u.active === false ? ' · <span style="color:var(--red)">отключен</span>' : '') +
+          '</div>' +
+        '</div>' +
+        (id !== me.id ?
+          '<div class="acts-row">' +
+            '<select onchange="setR(\'' + id + '\',this.value)" style="font-size:.8rem;padding:4px">' +
+              '<option value="employee"' + (u.role === 'employee' ? ' selected' : '') + '>Сотрудник</option>' +
+              '<option value="senior"' + (u.role === 'senior' ? ' selected' : '') + '>Старший</option>' +
+              '<option value="admin"' + (u.role === 'admin' ? ' selected' : '') + '>Админ</option>' +
+            '</select>' +
+            '<button class="btn btn-g btn-sm" onclick="togU(\'' + id + '\')">' + (u.active === false ? 'Включить' : 'Отключить') + '</button>' +
+            '<button class="btn btn-d btn-sm" onclick="delU(\'' + id + '\')">Удалить</button>' +
+          '</div>' :
+          '<span class="hint" style="font-weight:600">Текущий аккаунт</span>') +
+      '</div>' +
+    '</div>'
+  ).join('');
+}
+
+async function setR(id, role) {
+  if (users[id]) users[id].role = role;
+  await db.ref('cgb_users/' + id + '/role').set(role);
+  renU();
+}
+
+async function togU(id) {
+  const a = users[id] && users[id].active === false ? true : false;
+  if (users[id]) users[id].active = a;
+  await db.ref('cgb_users/' + id + '/active').set(a);
+  renU();
+}
+
+async function delU(id) {
+  if (!confirm('Удалить пользователя из системы?')) return;
+  await db.ref('cgb_users/' + id).remove();
+  delete users[id];
+  renU();
+}
+
+/* ==========================================================================
+   НАСТРОЙКИ АККАУНТА
+   ========================================================================== */
+async function saveA() {
+  const name = document.getElementById('cN').value.trim();
+  const sur = document.getElementById('cS').value.trim();
+  const pass = fP(document.getElementById('cP').value.trim());
+  const msg = document.getElementById('cM');
+
+  if (!name || !sur) {
+    msg.textContent = 'Имя и фамилия обязательны';
+    msg.style.color = 'var(--red)';
+    return;
+  }
+  try {
+    await db.ref('cgb_users/' + me.id).update({ name: name, surname: sur, passport: pass });
+    me.name = name;
+    me.surname = sur;
+    me.passport = pass;
+    saveSes();
+    updAv();
+    msg.textContent = 'Данные успешно обновлены';
+    msg.style.color = 'var(--green)';
+  } catch(e) {
+    msg.textContent = e.message;
+    msg.style.color = 'var(--red)';
+  }
+}
+
+async function chP() {
+  const p1 = document.getElementById('np1').value;
+  const p2 = document.getElementById('np2').value;
+  const msg = document.getElementById('pM');
+
+  if (!p1 || p1.length < 4) {
+    msg.textContent = 'Минимальная длина пароля — 4 символа';
+    msg.style.color = 'var(--red)';
+    return;
+  }
+  if (p1 !== p2) {
+    msg.textContent = 'Пароли не совпадают';
+    msg.style.color = 'var(--red)';
+    return;
+  }
+  try {
+    await db.ref('cgb_users/' + me.id + '/passwordHash').set(await hash(p1));
+    document.getElementById('np1').value = '';
+    document.getElementById('np2').value = '';
+    msg.textContent = 'Пароль успешно изменён';
+    msg.style.color = 'var(--green)';
+  } catch(e) {
+    msg.textContent = e.message;
+    msg.style.color = 'var(--red)';
+  }
+}
+
+function updAv() {
+  const b = document.getElementById('avB');
+  if (me.avatar) {
+    b.innerHTML = '<img src="' + me.avatar + '">';
+  } else {
+    b.textContent = ((me.name || '?')[0] + (me.surname || '?')[0]).toUpperCase();
+  }
+}
+
+async function setAv(ev) {
+  const f = ev.target.files?.[0];
+  if (!f) return;
+  if (f.size > 400000) { alert('Максимальный размер фото 400 КБ'); return; }
+  const r = new FileReader();
+  r.onload = async () => {
+    try {
+      await db.ref('cgb_users/' + me.id + '/avatar').set(r.result);
+      me.avatar = r.result;
+      saveSes();
+      updAv();
+    } catch(e) {
+      alert(e.message);
+    }
+  };
+  r.readAsDataURL(f);
+}
+
+/* ==========================================================================
+   НАВИГАЦИЯ И МЕНЮ
+   ========================================================================== */
+function go(s) {
+  document.querySelectorAll('.sec').forEach(x => x.classList.remove('a'));
+  document.querySelectorAll('.nb').forEach(x => x.classList.remove('a'));
+  const target = document.getElementById('s-' + s);
+  if (target) target.classList.add('a');
+  const btn = document.querySelector('.nb[data-s="' + s + '"]');
+  if (btn) btn.classList.add('a');
+
+  document.getElementById('side').classList.remove('open');
+  document.getElementById('ov').classList.remove('open');
+
+  if (s === 'admin' && isAd()) renU();
+  if (s === 'disciplinary') renD();
+  if (s === 'cleanup') fillCleanup();
+}
+
+function togSide() {
+  document.getElementById('side').classList.toggle('open');
+  document.getElementById('ov').classList.toggle('open');
+}
+function togMenu() { document.getElementById('avM').classList.toggle('open'); }
+function clsMenu() { document.getElementById('avM').classList.remove('open'); }
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('login').style.display === 'flex') login();
+  if (e.key === 'Escape') { clsEd(); clsMenu(); }
+});
+
+document.addEventListener('click', e => {
+  const m = document.getElementById('avM'), b = document.getElementById('avB');
+  if (m.classList.contains('open') && !m.contains(e.target) && e.target !== b && !b.contains(e.target)) clsMenu();
+  const s = document.querySelector('.sr');
+  if (s && !s.contains(e.target)) document.getElementById('sR').classList.remove('on');
+});
+
+document.addEventListener('input', e => {
+  if (['aP', 'uP', 'cP', 'dP', 'eP'].includes(e.target.id)) e.target.value = fP(e.target.value);
+});
+
+/* ==========================================================================
+   ЭФФЕКТЫ ИНТЕРФЕЙСА
+   ========================================================================== */
+let fx = { sound: true, particles: true, animations: true, volume: 0.35, animStyle: 'pulse' };
+try { fx = { ...fx, ...(LS.get('cgb_fx') || {}) }; } catch(e) {}
+
+function fxSave() {
+  LS.set('cgb_fx', fx);
+  fxUI();
+}
+
+function fxUI() {
+  const ids = { sound: 'fxSoundToggle', particles: 'fxParticlesToggle', animations: 'fxAnimToggle' };
+  Object.keys(ids).forEach(k => {
+    const b = document.getElementById(ids[k]);
+    if (b) b.classList.toggle('on', !!fx[k]);
+  });
+  const v = document.getElementById('fxVolume'); if (v) v.value = Math.round(fx.volume * 100);
+  const st = document.getElementById('fxAnimStyle'); if (st) st.value = fx.animStyle || 'pulse';
+  const c = document.getElementById('fxCanvas'); if (c) c.style.display = fx.particles ? 'block' : 'none';
+}
+
+function fxToggle(k) { fx[k] = !fx[k]; fxSave(); if (k === 'sound') fxBeep('tap'); }
+function fxSetVolume(v) { fx.volume = Number(v) / 100; LS.set('cgb_fx', fx); }
+function fxSetStyle(v) { fx.animStyle = v; fxSave(); }
+
+let fxAudio = null;
+function fxBeep(kind) {
+  if (!fx.sound || fx.volume <= 0) return;
+  try {
+    const A = window.AudioContext || window.webkitAudioContext;
+    if (!A) return;
+    fxAudio = fxAudio || new A();
+    if (fxAudio.state === 'suspended') fxAudio.resume();
+    const o = fxAudio.createOscillator(), g = fxAudio.createGain();
+    o.type = 'sine';
+    o.frequency.value = (kind === 'ok' ? 620 : (kind === 'bad' ? 260 : 520));
+    g.gain.setValueAtTime(0.0001, fxAudio.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.035 * fx.volume, fxAudio.currentTime + 0.008);
+    g.gain.exponentialRampToValueAtTime(0.0001, fxAudio.currentTime + 0.09);
+    o.connect(g);
+    g.connect(fxAudio.destination);
+    o.start();
+    o.stop(fxAudio.currentTime + 0.095);
+  } catch(e) {}
+}
+
+function fxPulse(el) {
+  if (!fx.animations || !el) return;
+  el.classList.remove('fx-pulse', 'fx-bounce', 'fx-glow', 'fx-lift');
+  void el.offsetWidth;
+  el.classList.add('fx-' + (fx.animStyle || 'pulse'));
+}
+
+(function() {
+  const c = document.getElementById('fxCanvas'), ctx = c && c.getContext('2d');
+  if (!c || !ctx) return;
+  let pts = [];
+  function resize() {
+    c.width = innerWidth * devicePixelRatio;
+    c.height = innerHeight * devicePixelRatio;
+    ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+    pts = Array.from({ length: 90 }, () => ({
+      x: Math.random() * innerWidth,
+      y: Math.random() * innerHeight,
+      vx: (Math.random() - 0.5) * 0.16,
+      vy: (Math.random() - 0.5) * 0.16,
+      r: 1.5 + Math.random() * 2
+    }));
+  }
+  function frame() {
+    if (fx.particles) {
+      ctx.clearRect(0, 0, innerWidth, innerHeight);
+      for (const p of pts) {
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < 0) p.x = innerWidth;
+        if (p.x > innerWidth) p.x = 0;
+        if (p.y < 0) p.y = innerHeight;
+        if (p.y > innerHeight) p.y = 0;
+        ctx.globalAlpha = 0.3;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = '#9fb7d9';
+        ctx.fill();
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+  addEventListener('resize', resize);
+  resize();
+  frame();
+})();
+
+/* ==========================================================================
+   ЗАПУСК ПРИЛОЖЕНИЯ
+   ========================================================================== */
+function bootApp() {
+  try {
+    fxUI();
+    db.ref('cgb_users').once('value').then(async snap => {
+      users = snap.val() || {};
+      if (!Object.keys(users).length) {
+        try { await bootAd(); } catch(e) {}
+      }
+      const s = loadSes();
+      if (s && users[s.id] && users[s.id].active !== false) {
+        const u = users[s.id];
+        me = { id: s.id, login: u.login, name: u.name, surname: u.surname, role: u.role, passport: u.passport || '', avatar: u.avatar || '' };
+        saveSes();
+        openApp();
+      } else {
+        document.getElementById('login').style.display = 'flex';
+        st(true, 'Локально');
+      }
+    });
+  } catch(e) {
+    document.getElementById('login').style.display = 'flex';
+    st(false, 'Ошибка: ' + (e && e.message ? e.message : e));
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bootApp, { once: true });
+} else {
+  bootApp();
+}
+</script>
+</body>
+</html>
