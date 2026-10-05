@@ -1826,17 +1826,8 @@ function checkLockout() {
 
 let idleTimer = null;
 function resetIdleTimer() {
-  clearTimeout(idleTimer);
-  if (me) {
-    idleTimer = setTimeout(() => {
-      logout();
-      err('lErr', 'Сессия заблокирована по соображениям безопасности (неактивность 30 мин)');
-    }, 30 * 60 * 1000);
-  }
+  // Автоматический выход по неактивности (30 мин) отключен
 }
-window.addEventListener('mousemove', resetIdleTimer, { passive: true });
-window.addEventListener('keydown', resetIdleTimer, { passive: true });
-window.addEventListener('click', resetIdleTimer, { passive: true });
 
 /* ==========================================================================
    АВТОРИЗАЦИЯ
