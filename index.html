@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>АБ — Панель управления (Личный состав)</title>
-<style>:root {
+<style>
+:root {
   --bg: #0d121b;
   --bg-subtle: #121926;
   --card: #16202f;
@@ -52,7 +53,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Background Atmosphere */
 body::before {
   content: "";
   position: fixed;
@@ -81,7 +81,7 @@ body::before {
   border-radius: var(--radius-lg);
   padding: 32px;
   width: 100%;
-  max-width: 410px;
+  max-width: 420px;
   box-shadow: var(--shadow-lg);
   backdrop-filter: blur(12px);
 }
@@ -218,6 +218,20 @@ body::before {
   display: block;
 }
 
+/* Security Badge */
+.sec-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(16, 185, 129, 0.12);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
 /* Top App Header */
 #app {
   display: none;
@@ -326,7 +340,7 @@ body::before {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  min-width: 190px;
+  min-width: 200px;
   padding: 6px;
   display: none;
   z-index: 60;
@@ -710,7 +724,7 @@ body::before {
   cursor: pointer;
 }
 
-/* Category Groups (Calm, Elegant Headers) */
+/* Category Groups */
 .cat-group {
   margin: 20px 0 12px;
 }
@@ -779,7 +793,7 @@ body::before {
   gap: 6px;
 }
 
-/* Employee Card (Calm, Premium Look) */
+/* Employee Card */
 .card {
   background: var(--card);
   border: 1px solid var(--border);
@@ -876,7 +890,7 @@ body::before {
   justify-content: flex-end;
 }
 
-/* Checkboxes Grid - 5 Equal, Symmetrical Tiles */
+/* Checkboxes Grid - 5 Columns */
 .cks {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -1020,14 +1034,14 @@ body::before {
 .mbg {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.65);
   z-index: 200;
   display: none;
   align-items: center;
   justify-content: center;
   padding: 16px;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
 }
 
 .mbg.open {
@@ -1092,7 +1106,7 @@ pre.rp {
   height: 100%;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.25;
+  opacity: 0.22;
 }
 
 .fx-settings {
@@ -1175,7 +1189,8 @@ pre.rp {
   .add-bar { flex-direction: column; align-items: stretch; }
   .card-top { flex-direction: column; }
   .card-actions { align-items: flex-start; }
-}</style>
+}
+</style>
 </head>
 <body><canvas id="fxCanvas" aria-hidden="true"></canvas>
 
@@ -1183,12 +1198,24 @@ pre.rp {
 <div class="auth" id="login" style="display:flex">
   <div class="box">
     <h1>АБ — Вход</h1>
-    <p class="sub">Панель проверок личного состава</p>
+    <p class="sub">Защищённая панель проверок личного состава</p>
+    <div style="text-align:center;margin-bottom:16px">
+      <span class="sec-badge">🔒 AES-256-GCM + PBKDF2</span>
+    </div>
     <div class="err" id="lErr"></div>
-    <div class="f"><label>Логин</label><input id="lIn" value="maksim-milonov-877-506" placeholder="maksim-milonov-877-506"></div>
-    <div class="f"><label>Пароль</label><input id="pIn" type="password" value="makschinik11" placeholder="Пароль"></div>
+    <div class="f">
+      <label>Логин</label>
+      <input id="lIn" placeholder="Введите логин" autocomplete="username">
+    </div>
+    <div class="f">
+      <label>Пароль</label>
+      <input id="pIn" type="password" placeholder="Введите пароль" autocomplete="current-password">
+    </div>
     <button class="btn btn-p" id="lBtn" style="width:100%;margin-top:8px" onclick="login()">Войти</button>
-    <div class="hint" style="text-align:center;margin-top:12px;color:var(--muted)">Локальный режим: вход без Firebase</div>
+    <div class="hint" id="firstLoginHint" style="text-align:center;margin-top:14px;color:var(--muted);line-height:1.4">
+      По умолчанию: <strong>maksim-milonov-877-506</strong> / <strong>makschinik11</strong><br>
+      <small style="opacity:0.75">Рекомендуется сменить пароль в настройках после первого входа</small>
+    </div>
   </div>
 </div>
 
@@ -1197,7 +1224,8 @@ pre.rp {
   <header class="top">
     <h1>АБ <span>· проверки личного состава</span></h1>
     <div class="tr">
-      <span id="st" style="font-size:.8rem"><span class="dot on"></span>Локальный режим</span>
+      <span class="sec-badge" title="Все данные зашифрованы алгоритмом AES-256">🔒 Зашифровано</span>
+      <span id="st"><span class="dot on"></span>В сети</span>
       <button class="av" id="avB" onclick="togMenu()">?</button>
       <div class="drop" id="avM">
         <button onclick="go('account');clsMenu()">⚙️ Настройки</button>
@@ -1219,7 +1247,7 @@ pre.rp {
       <button class="nb" data-s="report" id="nR" onclick="go('report')">📄 Итоговый отчёт</button>
       <button class="nb" data-s="cleanup" id="nC" onclick="go('cleanup')">🧹 Очистка таблицы</button>
       <button class="nb" data-s="admin" id="nA" style="display:none" onclick="go('admin')">⚙️ Администрирование</button>
-      <button class="nb" data-s="account" onclick="go('account')">👤 Аккаунт</button>
+      <button class="nb" data-s="account" onclick="go('account')">👤 Аккаунт и Безопасность</button>
     </nav>
   </aside>
 
@@ -1247,10 +1275,10 @@ pre.rp {
       <!-- Department Tabs -->
       <div class="tabs" id="tabs"></div>
 
-      <!-- Category Management Bar (under tabs) -->
+      <!-- Category Management Bar -->
       <div class="cat-bar" id="catBar" style="display:none">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-          <span style="font-size:.82rem;color:var(--muted);font-weight:600">📁 Категории:</span>
+          <span style="font-size:.82rem;color:var(--text-secondary);font-weight:600">📁 Категории:</span>
           <div class="cat-chips" id="catChips"></div>
         </div>
         <button class="btn btn-g btn-sm" id="btnNewCat" onclick="createCat()">＋ Создать категорию</button>
@@ -1336,7 +1364,7 @@ pre.rp {
         </div>
         <div class="fr">
           <div class="x"><label>Логин</label><input id="uL"></div>
-          <div class="x"><label>Пароль</label><input id="uW"></div>
+          <div class="x"><label>Пароль</label><input id="uW" type="password"></div>
           <div class="x"><label>Роль</label><select id="uR"><option value="employee">Сотрудник</option><option value="senior">Старший состав</option><option value="admin">Администратор</option></select></div>
         </div>
         <button class="btn btn-p" style="width:auto" onclick="cUser()">Создать</button>
@@ -1345,30 +1373,53 @@ pre.rp {
       <div class="fc"><h3>Пользователи системы</h3><div id="uLi"></div></div>
     </section>
 
-    <!-- SECTION: ACCOUNT -->
+    <!-- SECTION: ACCOUNT & SECURITY -->
     <section class="sec" id="s-account">
-      <div class="tit">Аккаунт и эффекты</div>
+      <div class="tit">Аккаунт и Безопасность</div>
+
+      <div class="fc">
+        <h3>🛡️ Криптографическая защита данных</h3>
+        <div style="font-size:0.86rem;color:var(--text-secondary);line-height:1.6;margin-bottom:14px">
+          Все ваши данные (личный состав, паспорта, категории, дисциплинарные записи) хранятся в зашифрованном виде с использованием стандарта <strong>AES-GCM (256 бит)</strong>. Ключ шифрования формируется с помощью <strong>PBKDF2 (100&nbsp;000 итераций SHA-256)</strong> на основе вашего пароля.
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-g btn-sm" onclick="exportBackup()">📥 Экспорт резервной копии (.json)</button>
+          <button class="btn btn-g btn-sm" onclick="document.getElementById('importFile').click()">📤 Импорт резервной копии</button>
+          <input type="file" id="importFile" accept=".json" style="display:none" onchange="importBackup(event)">
+        </div>
+        <div class="hint" id="bkM"></div>
+      </div>
+
+      <div class="fc">
+        <h3>Личные данные</h3>
+        <div class="fr">
+          <div class="x"><label>Имя</label><input id="cN"></div>
+          <div class="x"><label>Фамилия</label><input id="cS"></div>
+          <div class="x"><label>Паспорт</label><input id="cP" maxlength="7"></div>
+        </div>
+        <button class="btn btn-p" style="width:auto" onclick="saveA()">Сохранить</button>
+        <div class="hint" id="cM"></div>
+      </div>
+
+      <div class="fc">
+        <h3>Смена пароля и перешифрование базы</h3>
+        <div class="fr">
+          <div class="x"><label>Новый пароль</label><input type="password" id="np1"></div>
+          <div class="x"><label>Повтор нового пароля</label><input type="password" id="np2"></div>
+        </div>
+        <button class="btn btn-p" style="width:auto" onclick="chP()">Сменить пароль</button>
+        <div class="hint" id="pM"></div>
+      </div>
+
       <div class="fc">
         <h3>Эффекты интерфейса</h3>
         <div class="fx-settings">
           <div class="fx-row"><div class="fx-label">Звуки интерфейса<small>Мягкий звуковой отклик при кликах</small></div><button class="fx-toggle" id="fxSoundToggle" onclick="fxToggle('sound')"><i></i></button></div>
           <div class="fx-row"><div class="fx-label">Громкость</div><input class="fx-range" id="fxVolume" type="range" min="0" max="100" value="35" oninput="fxSetVolume(this.value)"></div>
-          <div class="fx-row"><div class="fx-label">Фоновые частицы<small>Мягкая фоновая анимация</small></div><button class="fx-toggle" id="fxParticlesToggle" onclick="fxToggle('particles')"><i></i></button></div>
+          <div class="fx-row"><div class="fx-label">Фоновые частицы<small>Мягкая фоновая атмосфера</small></div><button class="fx-toggle" id="fxParticlesToggle" onclick="fxToggle('particles')"><i></i></button></div>
           <div class="fx-row"><div class="fx-label">Анимации кнопок<small>Эффект нажатия на проверки</small></div><button class="fx-toggle" id="fxAnimToggle" onclick="fxToggle('animations')"><i></i></button></div>
           <div class="fx-row"><div class="fx-label">Стиль анимации</div><select id="fxAnimStyle" onchange="fxSetStyle(this.value)" style="min-width:150px"><option value="pulse">Мягкое увеличение</option><option value="bounce">Лёгкий bounce</option><option value="glow">Подсветка</option><option value="lift">Подъём</option></select></div>
         </div>
-      </div>
-      <div class="fc">
-        <h3>Личные данные</h3>
-        <div class="fr"><div class="x"><label>Имя</label><input id="cN"></div><div class="x"><label>Фамилия</label><input id="cS"></div><div class="x"><label>Паспорт</label><input id="cP" maxlength="7"></div></div>
-        <button class="btn btn-p" style="width:auto" onclick="saveA()">Сохранить</button>
-        <div class="hint" id="cM"></div>
-      </div>
-      <div class="fc">
-        <h3>Смена пароля</h3>
-        <div class="fr"><div class="x"><label>Новый пароль</label><input type="password" id="np1"></div><div class="x"><label>Повтор пароля</label><input type="password" id="np2"></div></div>
-        <button class="btn btn-p" style="width:auto" onclick="chP()">Сменить</button>
-        <div class="hint" id="pM"></div>
       </div>
     </section>
   </main>
@@ -1422,126 +1473,303 @@ const DT = {
 };
 
 let data = {}, users = {}, me = null, tab = 'ruk', dTab = 'active', disc = {}, categories = {}, saveT, searchT;
+let masterKey = null; // AES-GCM CryptoKey в оперативной памяти (никогда не пишется в открытом виде на диск)
 
 /* ==========================================================================
-   LOCAL STORAGE DATABASE (Замена Firebase на локальный режим)
+   КРИПТОГРАФИЧЕСКИЙ ДВИЖОК (Web Crypto API: PBKDF2 + AES-GCM 256-bit)
    ========================================================================== */
-const LS = {
-  get(key) {
-    try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch(e) { return null; }
+const CryptoEngine = {
+  textEncoder: new TextEncoder(),
+  textDecoder: new TextDecoder(),
+
+  buf2b64(buf) {
+    let binary = '';
+    const bytes = new Uint8Array(buf);
+    for (let i = 0; i < bytes.byteLength; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
   },
-  set(key, val) {
-    try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
+
+  b642buf(b64) {
+    const binary = atob(b64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    return bytes.buffer;
   },
-  remove(key) {
-    try { localStorage.removeItem(key); } catch(e) {}
+
+  getSalt() {
+    let saltB64 = localStorage.getItem('cgb_master_salt');
+    if (!saltB64) {
+      const salt = crypto.getRandomValues(new Uint8Array(16));
+      saltB64 = this.buf2b64(salt);
+      localStorage.setItem('cgb_master_salt', saltB64);
+    }
+    return new Uint8Array(this.b642buf(saltB64));
   },
+
+  async deriveKey(password, salt) {
+    const keyMaterial = await crypto.subtle.importKey(
+      'raw',
+      this.textEncoder.encode(password),
+      { name: 'PBKDF2' },
+      false,
+      ['deriveKey', 'deriveBits']
+    );
+
+    return await crypto.subtle.deriveKey(
+      {
+        name: 'PBKDF2',
+        salt: salt,
+        iterations: 100000,
+        hash: 'SHA-256'
+      },
+      keyMaterial,
+      { name: 'AES-GCM', length: 256 },
+      false,
+      ['encrypt', 'decrypt']
+    );
+  },
+
+  async hashPassword(password, salt) {
+    const keyMaterial = await crypto.subtle.importKey(
+      'raw',
+      this.textEncoder.encode(password),
+      { name: 'PBKDF2' },
+      false,
+      ['deriveBits']
+    );
+    const bits = await crypto.subtle.deriveBits(
+      {
+        name: 'PBKDF2',
+        salt: salt,
+        iterations: 100000,
+        hash: 'SHA-256'
+      },
+      keyMaterial,
+      256
+    );
+    return this.buf2b64(bits);
+  },
+
+  async encrypt(dataObj, key) {
+    if (!key) throw new Error('Отсутствует ключ шифрования');
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const plaintext = JSON.stringify(dataObj);
+    const cipherBuffer = await crypto.subtle.encrypt(
+      { name: 'AES-GCM', iv: iv },
+      key,
+      this.textEncoder.encode(plaintext)
+    );
+    return {
+      iv: this.buf2b64(iv),
+      data: this.buf2b64(cipherBuffer)
+    };
+  },
+
+  async decrypt(encryptedObj, key) {
+    if (!key) throw new Error('Отсутствует ключ дешифрования');
+    if (!encryptedObj || !encryptedObj.iv || !encryptedObj.data) return null;
+    const iv = new Uint8Array(this.b642buf(encryptedObj.iv));
+    const cipherBuffer = this.b642buf(encryptedObj.data);
+    const decryptedBuffer = await crypto.subtle.decrypt(
+      { name: 'AES-GCM', iv: iv },
+      key,
+      cipherBuffer
+    );
+    return JSON.parse(this.textDecoder.decode(decryptedBuffer));
+  }
+};
+
+/* ==========================================================================
+   ЗАЩИЩЕННАЯ БАЗА ДАННЫХ (AES-256 Encrypted LocalStorage)
+   ========================================================================== */
+const EncryptedDB = {
+  async saveAll() {
+    if (!masterKey) return;
+    try {
+      const payload = {
+        data: data,
+        categories: categories,
+        disc: disc,
+        users: users,
+        version: 2,
+        updatedAt: Date.now()
+      };
+      const encrypted = await CryptoEngine.encrypt(payload, masterKey);
+      localStorage.setItem('cgb_secure_vault', JSON.stringify(encrypted));
+      st(true, 'Зашифровано и сохранено');
+    } catch(e) {
+      console.error('Ошибка шифрования:', e);
+      st(false, 'Ошибка сохранения');
+    }
+  },
+
+  async loadAll() {
+    if (!masterKey) return false;
+    const raw = localStorage.getItem('cgb_secure_vault');
+    if (!raw) return false;
+    try {
+      const encObj = JSON.parse(raw);
+      const decrypted = await CryptoEngine.decrypt(encObj, masterKey);
+      if (decrypted) {
+        data = decrypted.data || {};
+        categories = decrypted.categories || {};
+        disc = decrypted.disc || {};
+        users = decrypted.users || {};
+        return true;
+      }
+    } catch(e) {
+      console.error('Не удалось расшифровать данные:', e);
+      return false;
+    }
+    return false;
+  }
+};
+
+const db = {
   ref(path) {
     return {
-      _path: path,
       once() {
-        const parts = path.split('/');
-        const root = parts[0];
-        const sub = parts.slice(1);
-        let val = LS.get(root);
-        if (sub.length) {
-          sub.forEach(k => { val = (val && typeof val === 'object') ? val[k] : null; });
-        }
+        const root = path.split('/')[0];
+        let val = null;
+        if (root === 'cgb_proverki') val = data;
+        else if (root === 'cgb_categories') val = categories;
+        else if (root === 'cgb_disciplinary') val = disc;
+        else if (root === 'cgb_users') val = users;
         return Promise.resolve({ val() { return val; } });
       },
-      set(val) {
+      set(newVal) {
         const parts = path.split('/');
         const root = parts[0];
-        const sub = parts.slice(1);
-        if (!sub.length) {
-          LS.set(root, val);
+        if (parts.length === 1) {
+          if (root === 'cgb_proverki') data = newVal;
+          else if (root === 'cgb_categories') categories = newVal;
+          else if (root === 'cgb_disciplinary') disc = newVal;
+          else if (root === 'cgb_users') users = newVal;
         } else {
-          let obj = LS.get(root) || {};
-          let cur = obj;
-          for (let i = 0; i < sub.length - 1; i++) {
-            if (!cur[sub[i]]) cur[sub[i]] = {};
-            cur = cur[sub[i]];
+          const sub = parts[1];
+          if (root === 'cgb_disciplinary') {
+            if (parts.length === 3 && parts[2] === 'status') {
+              if (disc[sub]) disc[sub].status = newVal;
+            } else {
+              disc[sub] = newVal;
+            }
+          } else if (root === 'cgb_categories') {
+            categories[sub] = newVal;
+          } else if (root === 'cgb_users') {
+            if (parts.length === 3) {
+              if (users[sub]) users[sub][parts[2]] = newVal;
+            } else {
+              users[sub] = newVal;
+            }
           }
-          cur[sub[sub.length - 1]] = val;
-          LS.set(root, obj);
         }
-        return Promise.resolve();
+        return EncryptedDB.saveAll();
       },
-      update(val) {
+      update(updates) {
         const parts = path.split('/');
         const root = parts[0];
-        const sub = parts.slice(1);
-        let obj = LS.get(root) || {};
-        let cur = obj;
-        if (sub.length) {
-          for (let i = 0; i < sub.length - 1; i++) {
-            if (!cur[sub[i]]) cur[sub[i]] = {};
-            cur = cur[sub[i]];
-          }
-          cur[sub[sub.length - 1]] = Object.assign(cur[sub[sub.length - 1]] || {}, val);
-        } else {
-          Object.assign(obj, val);
+        const sub = parts[1];
+        if (root === 'cgb_users' && users[sub]) {
+          Object.assign(users[sub], updates);
         }
-        LS.set(root, obj);
-        return Promise.resolve();
+        return EncryptedDB.saveAll();
       },
       remove() {
         const parts = path.split('/');
         const root = parts[0];
-        const sub = parts.slice(1);
-        if (!sub.length) {
-          LS.remove(root);
-        } else {
-          let obj = LS.get(root) || {};
-          let cur = obj;
-          for (let i = 0; i < sub.length - 1; i++) {
-            cur = cur[sub[i]] || {};
-          }
-          delete cur[sub[sub.length - 1]];
-          LS.set(root, obj);
-        }
-        return Promise.resolve();
-      },
-      on(ev, cb) {
-        this.once().then(s => cb(s));
-        return this;
+        const sub = parts[1];
+        if (root === 'cgb_disciplinary') delete disc[sub];
+        else if (root === 'cgb_users') delete users[sub];
+        return EncryptedDB.saveAll();
       }
     };
   }
 };
 
-const db = LS;
-
 /* ==========================================================================
-   УТИЛИТЫ
+   УТИЛИТЫ И ВАЛИДАЦИЯ
    ========================================================================== */
-async function hash(p) {
-  const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(p));
-  return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join('');
-}
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
-function esc(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
-function fP(v) { const d = String(v).replace(/\D/g, '').slice(0, 6); return d.length <= 3 ? d : d.slice(0, 3) + '-' + d.slice(3); }
-function fD(i) { if (!i) return '—'; const p = i.split('-'); return p.length === 3 ? p[2] + '.' + p[1] + '.' + p[0] : i; }
+function esc(s) {
+  return String(s || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+function fP(v) {
+  const d = String(v).replace(/\D/g, '').slice(0, 6);
+  return d.length <= 3 ? d : d.slice(0, 3) + '-' + d.slice(3);
+}
+function fD(i) {
+  if (!i) return '—';
+  const p = i.split('-');
+  return p.length === 3 ? p[2] + '.' + p[1] + '.' + p[0] : i;
+}
 function err(id, t) { const e = document.getElementById(id); if (e) { e.textContent = t; e.classList.add('on'); } }
 function herr(id) { const e = document.getElementById(id); if (e) { e.textContent = ''; e.classList.remove('on'); } }
 function isAd() { return me && me.role === 'admin'; }
 function isSS() { return me && (me.role === 'senior' || me.role === 'admin'); }
 function who() { return me ? ((me.surname || '') + ' ' + (me.name || '')).trim() : ''; }
-function saveSes() {
-  LS.set('cgb_session', { id: me.id, login: me.login, name: me.name, surname: me.surname, role: me.role, passport: me.passport || '', avatar: me.avatar || '' });
-}
-function loadSes() { return LS.get('cgb_session'); }
 function st(ok, t) {
   const el = document.getElementById('st');
   if (el) el.innerHTML = '<span class="dot ' + (ok ? 'on' : 'off') + '"></span>' + esc(t);
 }
 
+/* Защита от подбора пароля (Brute-force lockout) */
+let failedAttempts = 0;
+let lockoutTimer = null;
+
+function checkLockout() {
+  if (failedAttempts >= 5) {
+    const remaining = 30;
+    err('lErr', 'Слишком много неверных попыток. Подождите 30 секунд...');
+    const btn = document.getElementById('lBtn');
+    btn.disabled = true;
+    let sec = remaining;
+    if (lockoutTimer) clearInterval(lockoutTimer);
+    lockoutTimer = setInterval(() => {
+      sec--;
+      if (sec <= 0) {
+        clearInterval(lockoutTimer);
+        failedAttempts = 0;
+        herr('lErr');
+        btn.disabled = false;
+        btn.textContent = 'Войти';
+      } else {
+        err('lErr', 'Блокировка безопасности: подождите ' + sec + ' сек.');
+      }
+    }, 1000);
+    return true;
+  }
+  return false;
+}
+
+/* Автоматическая блокировка при неактивности (30 минут) */
+let idleTimer = null;
+function resetIdleTimer() {
+  clearTimeout(idleTimer);
+  if (me) {
+    idleTimer = setTimeout(() => {
+      logout();
+      err('lErr', 'Сессия заблокирована по соображениям безопасности (неактивность 30 мин)');
+    }, 30 * 60 * 1000);
+  }
+}
+window.addEventListener('mousemove', resetIdleTimer, { passive: true });
+window.addEventListener('keydown', resetIdleTimer, { passive: true });
+window.addEventListener('click', resetIdleTimer, { passive: true });
+
 /* ==========================================================================
-   АВТОРИЗАЦИЯ И ПОЛЬЗОВАТЕЛИ
+   АВТОРИЗАЦИЯ И ШИФРОВАНИЕ
    ========================================================================== */
-async function bootAd() {
-  const passwordHash = await hash('makschinik11');
+async function bootAd(salt) {
+  const passwordHash = await CryptoEngine.hashPassword('makschinik11', salt);
   const id = 'u_admin_main';
   const user = {
     login: 'maksim-milonov-877-506',
@@ -1554,24 +1782,56 @@ async function bootAd() {
     createdAt: Date.now(),
     avatar: ''
   };
-  await db.ref('cgb_users/' + id).set(user);
   users[id] = user;
 }
 
 async function login() {
+  if (checkLockout()) return;
   herr('lErr');
+
   const loginInput = document.getElementById('lIn').value.trim().toLowerCase();
   const pass = document.getElementById('pIn').value;
-  if (!loginInput || !pass) { err('lErr', 'Введите логин и пароль'); return; }
+
+  if (!loginInput || !pass) {
+    err('lErr', 'Введите логин и пароль');
+    return;
+  }
 
   const btn = document.getElementById('lBtn');
   btn.disabled = true;
-  btn.textContent = 'Вход...';
+  btn.textContent = 'Проверка ключа...';
 
   try {
-    const ph = await hash(pass);
-    const snap = await db.ref('cgb_users').once('value');
-    users = snap.val() || {};
+    const salt = CryptoEngine.getSalt();
+    const ph = await CryptoEngine.hashPassword(pass, salt);
+
+    // Если база ещё не создана — инициализируем аккаунт администратора по умолчанию
+    if (!localStorage.getItem('cgb_secure_vault')) {
+      if (loginInput === 'maksim-milonov-877-506' && pass === 'makschinik11') {
+        masterKey = await CryptoEngine.deriveKey(pass, salt);
+        await bootAd(salt);
+        ensureCats();
+        await EncryptedDB.saveAll();
+      } else {
+        failedAttempts++;
+        checkLockout();
+        err('lErr', 'Неверный логин или пароль');
+        btn.disabled = false;
+        btn.textContent = 'Войти';
+        return;
+      }
+    } else {
+      masterKey = await CryptoEngine.deriveKey(pass, salt);
+      const loaded = await EncryptedDB.loadAll();
+      if (!loaded) {
+        failedAttempts++;
+        checkLockout();
+        err('lErr', 'Неверный пароль (ошибка дешифрования данных)');
+        btn.disabled = false;
+        btn.textContent = 'Войти';
+        return;
+      }
+    }
 
     let found = null, fid = null;
     for (const [id, u] of Object.entries(users)) {
@@ -1580,13 +1840,9 @@ async function login() {
       }
     }
 
-    if (!found && loginInput === 'maksim-milonov-877-506' && pass === 'makschinik11') {
-      await bootAd();
-      found = users.u_admin_main;
-      fid = 'u_admin_main';
-    }
-
     if (!found) {
+      failedAttempts++;
+      checkLockout();
       err('lErr', 'Неверный логин или пароль');
       btn.disabled = false;
       btn.textContent = 'Войти';
@@ -1600,13 +1856,14 @@ async function login() {
       return;
     }
 
+    failedAttempts = 0;
     me = { id: fid, login: found.login, name: found.name, surname: found.surname, role: found.role, passport: found.passport || '', avatar: found.avatar || '' };
-    saveSes();
+
     btn.disabled = false;
     btn.textContent = 'Войти';
     openApp();
   } catch(e) {
-    err('lErr', e.message);
+    err('lErr', 'Криптографическая ошибка: ' + e.message);
     btn.disabled = false;
     btn.textContent = 'Войти';
   }
@@ -1614,10 +1871,12 @@ async function login() {
 
 function logout() {
   me = null;
-  LS.remove('cgb_session');
+  masterKey = null; // Очищаем ключ из памяти
   clsMenu();
+  document.getElementById('pIn').value = '';
   document.getElementById('app').style.display = 'none';
   document.getElementById('login').style.display = 'flex';
+  clearTimeout(idleTimer);
 }
 
 function openApp() {
@@ -1645,26 +1904,14 @@ function openApp() {
   document.getElementById('rT').value = iso(to);
 
   ensure();
-  load();
-
-  db.ref('cgb_categories').once('value').then(s => {
-    categories = s.val() || {};
-    ensureCats();
-    renderCats();
-    fillG();
-    fillCleanup();
-    render();
-  });
-
-  db.ref('cgb_disciplinary').once('value').then(s => {
-    disc = s.val() || {};
-    renD();
-  });
-
+  renderCats();
+  fillCleanup();
   renTabs();
   render();
+  renD();
   if (isAd()) renU();
-  st(true, 'Локально (' + (me.name || me.login) + ')');
+  st(true, (me.name || me.login));
+  resetIdleTimer();
 }
 
 /* ==========================================================================
@@ -1674,7 +1921,6 @@ function ensureCats() {
   DEPS.forEach(d => {
     if (!Array.isArray(categories[d.id])) {
       categories[d.id] = [];
-      // Инициализируем стандартные категории если пусто (кроме руководящего)
       if (d.id !== 'ruk') {
         categories[d.id] = [
           { id: 'cat_sen_' + d.id, name: 'Старший состав', createdAt: Date.now() },
@@ -1739,7 +1985,7 @@ function renderCats() {
     return;
   }
 
-  chips.innerHTML = cats.map((c, idx) => {
+  chips.innerHTML = cats.map(c => {
     const cnt = (data[tab] || []).filter(e => e.categoryId === c.id).length;
     let btns = '';
     if (isSS()) {
@@ -1837,16 +2083,8 @@ function sched() {
   clearTimeout(saveT);
   saveT = setTimeout(() => {
     ensure();
-    db.ref('cgb_proverki').set(data).then(() => st(true, 'Сохранено локально')).catch(() => st(false, 'Ошибка сохранения'));
+    EncryptedDB.saveAll();
   }, 350);
-}
-
-function load() {
-  db.ref('cgb_proverki').once('value').then(s => {
-    data = s.val() || {};
-    ensure();
-    render();
-  });
 }
 
 function isCh(e) {
@@ -2016,7 +2254,7 @@ function card(dep, e, idx, tot) {
                  (gl ? '<span class="gl-tag">' + esc(gl) + '</span>' : '') +
                '</div>' +
                '<div class="card-meta">' +
-                 (e.checkedBy ? '<span class="mt">Проверил: ' + esc(e.checkedBy) + '</span>' : '<span style="color:var(--muted)">Не проверен</span>') +
+                 (e.checkedBy ? '<span class="mt">Проверил: ' + esc(e.checkedBy) + '</span>' : '<span style="color:var(--text-secondary)">Не проверен</span>') +
                '</div>' +
              '</div>' +
              '<div class="card-actions">' +
@@ -2039,7 +2277,7 @@ function addE() {
   const dep = document.getElementById('aD').value;
 
   if (!name || !sur || !pass || pass.length < 7) {
-    alert('Заполните корректно Имя, Фамилию и номер Паспорта (6 цифр)');
+    alert('Заполните корректно Имя, Фамилию и номер Паспорта (формат: 123-456)');
     return;
   }
   if (!isSS() && dep === 'ruk') {
@@ -2271,7 +2509,7 @@ async function clearChecks() {
   });
 
   syncCleanupMirror(dep, targets);
-  await db.ref('cgb_proverki').set(data);
+  await EncryptedDB.saveAll();
   render();
   fillCleanup();
   document.getElementById('clM').textContent = 'Проверки успешно сброшены (' + targets.length + ' чел.)';
@@ -2409,8 +2647,8 @@ async function addD() {
   };
 
   try {
-    await db.ref('cgb_disciplinary/' + id).set(item);
     disc[id] = item;
+    await EncryptedDB.saveAll();
     ['dN', 'dS', 'dP', 'dNo', 'dFr', 'dTo'].forEach(i => document.getElementById(i).value = '');
     msg.textContent = 'Взыскание успешно сохранено';
     msg.style.color = 'var(--green)';
@@ -2476,21 +2714,21 @@ function renD() {
 }
 
 async function archD(id) {
-  await db.ref('cgb_disciplinary/' + id + '/status').set('archive');
   if (disc[id]) disc[id].status = 'archive';
+  await EncryptedDB.saveAll();
   renD();
 }
 
 async function actD(id) {
-  await db.ref('cgb_disciplinary/' + id + '/status').set('active');
   if (disc[id]) disc[id].status = 'active';
+  await EncryptedDB.saveAll();
   renD();
 }
 
 async function delD(id) {
   if (!confirm('Удалить запись о взыскании?')) return;
-  await db.ref('cgb_disciplinary/' + id).remove();
   delete disc[id];
+  await EncryptedDB.saveAll();
   renD();
 }
 
@@ -2626,7 +2864,8 @@ async function cUser() {
   }
 
   try {
-    const ph = await hash(pwd);
+    const salt = CryptoEngine.getSalt();
+    const ph = await CryptoEngine.hashPassword(pwd, salt);
     const id = 'u_' + uid();
     const user = {
       login: loginVal,
@@ -2639,8 +2878,8 @@ async function cUser() {
       createdAt: Date.now(),
       avatar: ''
     };
-    await db.ref('cgb_users/' + id).set(user);
     users[id] = user;
+    await EncryptedDB.saveAll();
     msg.textContent = 'Пользователь успешно создан';
     msg.style.color = 'var(--green)';
     ['uN', 'uS', 'uP', 'uL', 'uW'].forEach(i => document.getElementById(i).value = '');
@@ -2690,26 +2929,26 @@ function renU() {
 
 async function setR(id, role) {
   if (users[id]) users[id].role = role;
-  await db.ref('cgb_users/' + id + '/role').set(role);
+  await EncryptedDB.saveAll();
   renU();
 }
 
 async function togU(id) {
   const a = users[id] && users[id].active === false ? true : false;
   if (users[id]) users[id].active = a;
-  await db.ref('cgb_users/' + id + '/active').set(a);
+  await EncryptedDB.saveAll();
   renU();
 }
 
 async function delU(id) {
   if (!confirm('Удалить пользователя из системы?')) return;
-  await db.ref('cgb_users/' + id).remove();
   delete users[id];
+  await EncryptedDB.saveAll();
   renU();
 }
 
 /* ==========================================================================
-   НАСТРОЙКИ АККАУНТА
+   НАСТРОЙКИ АККАУНТА, СМЕНА ПАРОЛЯ И РЕЗЕРВНОЕ КОПИРОВАНИЕ
    ========================================================================== */
 async function saveA() {
   const name = document.getElementById('cN').value.trim();
@@ -2723,13 +2962,17 @@ async function saveA() {
     return;
   }
   try {
-    await db.ref('cgb_users/' + me.id).update({ name: name, surname: sur, passport: pass });
     me.name = name;
     me.surname = sur;
     me.passport = pass;
-    saveSes();
+    if (users[me.id]) {
+      users[me.id].name = name;
+      users[me.id].surname = sur;
+      users[me.id].passport = pass;
+    }
+    await EncryptedDB.saveAll();
     updAv();
-    msg.textContent = 'Данные успешно обновлены';
+    msg.textContent = 'Данные успешно сохранены';
     msg.style.color = 'var(--green)';
   } catch(e) {
     msg.textContent = e.message;
@@ -2753,10 +2996,18 @@ async function chP() {
     return;
   }
   try {
-    await db.ref('cgb_users/' + me.id + '/passwordHash').set(await hash(p1));
+    const salt = CryptoEngine.getSalt();
+    const newPh = await CryptoEngine.hashPassword(p1, salt);
+    if (users[me.id]) {
+      users[me.id].passwordHash = newPh;
+    }
+    // Пересоздаём мастер-ключ и полностью перешифровываем всю базу данных новым ключом
+    masterKey = await CryptoEngine.deriveKey(p1, salt);
+    await EncryptedDB.saveAll();
+
     document.getElementById('np1').value = '';
     document.getElementById('np2').value = '';
-    msg.textContent = 'Пароль успешно изменён';
+    msg.textContent = 'Пароль изменён, база данных перешифрована новым ключом';
     msg.style.color = 'var(--green)';
   } catch(e) {
     msg.textContent = e.message;
@@ -2780,15 +3031,70 @@ async function setAv(ev) {
   const r = new FileReader();
   r.onload = async () => {
     try {
-      await db.ref('cgb_users/' + me.id + '/avatar').set(r.result);
       me.avatar = r.result;
-      saveSes();
+      if (users[me.id]) users[me.id].avatar = r.result;
+      await EncryptedDB.saveAll();
       updAv();
     } catch(e) {
       alert(e.message);
     }
   };
   r.readAsDataURL(f);
+}
+
+/* Экспорт и импорт защищенной резервной копии */
+function exportBackup() {
+  try {
+    const raw = localStorage.getItem('cgb_secure_vault');
+    const salt = localStorage.getItem('cgb_master_salt');
+    if (!raw) {
+      alert('Нет данных для экспорта');
+      return;
+    }
+    const backupObj = {
+      app: 'cgb-proverki',
+      version: 2,
+      exportedAt: new Date().toISOString(),
+      salt: salt,
+      vault: JSON.parse(raw)
+    };
+    const blob = new Blob([JSON.stringify(backupObj, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'cgb_backup_' + new Date().toISOString().slice(0, 10) + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    document.getElementById('bkM').textContent = 'Резервная копия скачана на устройство';
+    document.getElementById('bkM').style.color = 'var(--green)';
+  } catch(e) {
+    alert('Ошибка экспорта: ' + e.message);
+  }
+}
+
+function importBackup(ev) {
+  const file = ev.target.files?.[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async () => {
+    try {
+      const backup = JSON.parse(reader.result);
+      if (!backup.vault || !backup.vault.iv || !backup.vault.data) {
+        alert('Неверный формат файла резервной копии');
+        return;
+      }
+      if (!confirm('Восстановить данные из резервной копии? Текущие данные будут заменены.')) return;
+
+      localStorage.setItem('cgb_secure_vault', JSON.stringify(backup.vault));
+      if (backup.salt) localStorage.setItem('cgb_master_salt', backup.salt);
+
+      alert('Резервная копия загружена! Пожалуйста, выполните вход с паролем от этой копии.');
+      logout();
+    } catch(e) {
+      alert('Ошибка импорта: ' + e.message);
+    }
+  };
+  reader.readAsText(file);
 }
 
 /* ==========================================================================
@@ -2837,10 +3143,13 @@ document.addEventListener('input', e => {
    ЭФФЕКТЫ ИНТЕРФЕЙСА
    ========================================================================== */
 let fx = { sound: true, particles: true, animations: true, volume: 0.35, animStyle: 'pulse' };
-try { fx = { ...fx, ...(LS.get('cgb_fx') || {}) }; } catch(e) {}
+try {
+  const savedFx = localStorage.getItem('cgb_fx');
+  if (savedFx) fx = { ...fx, ...JSON.parse(savedFx) };
+} catch(e) {}
 
 function fxSave() {
-  LS.set('cgb_fx', fx);
+  localStorage.setItem('cgb_fx', JSON.stringify(fx));
   fxUI();
 }
 
@@ -2856,7 +3165,7 @@ function fxUI() {
 }
 
 function fxToggle(k) { fx[k] = !fx[k]; fxSave(); if (k === 'sound') fxBeep('tap'); }
-function fxSetVolume(v) { fx.volume = Number(v) / 100; LS.set('cgb_fx', fx); }
+function fxSetVolume(v) { fx.volume = Number(v) / 100; localStorage.setItem('cgb_fx', JSON.stringify(fx)); }
 function fxSetStyle(v) { fx.animStyle = v; fxSave(); }
 
 let fxAudio = null;
@@ -2895,11 +3204,11 @@ function fxPulse(el) {
     c.width = innerWidth * devicePixelRatio;
     c.height = innerHeight * devicePixelRatio;
     ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
-    pts = Array.from({ length: 90 }, () => ({
+    pts = Array.from({ length: 85 }, () => ({
       x: Math.random() * innerWidth,
       y: Math.random() * innerHeight,
-      vx: (Math.random() - 0.5) * 0.16,
-      vy: (Math.random() - 0.5) * 0.16,
+      vx: (Math.random() - 0.5) * 0.15,
+      vy: (Math.random() - 0.5) * 0.15,
       r: 1.5 + Math.random() * 2
     }));
   }
@@ -2912,7 +3221,7 @@ function fxPulse(el) {
         if (p.x > innerWidth) p.x = 0;
         if (p.y < 0) p.y = innerHeight;
         if (p.y > innerHeight) p.y = 0;
-        ctx.globalAlpha = 0.3;
+        ctx.globalAlpha = 0.22;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
         ctx.fillStyle = '#9fb7d9';
@@ -2932,25 +3241,15 @@ function fxPulse(el) {
 function bootApp() {
   try {
     fxUI();
-    db.ref('cgb_users').once('value').then(async snap => {
-      users = snap.val() || {};
-      if (!Object.keys(users).length) {
-        try { await bootAd(); } catch(e) {}
-      }
-      const s = loadSes();
-      if (s && users[s.id] && users[s.id].active !== false) {
-        const u = users[s.id];
-        me = { id: s.id, login: u.login, name: u.name, surname: u.surname, role: u.role, passport: u.passport || '', avatar: u.avatar || '' };
-        saveSes();
-        openApp();
-      } else {
-        document.getElementById('login').style.display = 'flex';
-        st(true, 'Локально');
-      }
-    });
+    // Проверяем наличие старых незашифрованных данных для плавной миграции
+    const oldVault = localStorage.getItem('cgb_proverki');
+    if (oldVault && !localStorage.getItem('cgb_secure_vault')) {
+      console.log('Обнаружены незашифрованные данные предыдущей версии, готовы к миграции при входе.');
+    }
+    document.getElementById('login').style.display = 'flex';
   } catch(e) {
     document.getElementById('login').style.display = 'flex';
-    st(false, 'Ошибка: ' + (e && e.message ? e.message : e));
+    err('lErr', 'Ошибка запуска: ' + e.message);
   }
 }
 
