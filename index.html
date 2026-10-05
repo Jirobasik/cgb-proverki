@@ -1191,6 +1191,8 @@ pre.rp {
   .card-actions { align-items: flex-start; }
 }
 </style>
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-database-compat.js"></script>
 </head>
 <body><canvas id="fxCanvas" aria-hidden="true"></canvas>
 
@@ -1469,6 +1471,56 @@ let data = {}, users = {}, me = null, tab = 'ruk', dTab = 'active', disc = {}, c
 let masterKey = null; // AES-GCM CryptoKey в оперативной памяти (никогда не пишется в открытом виде на диск)
 
 /* ==========================================================================
+   ПОДКЛЮЧЕНИЕ ОБЛАЧНОЙ БАЗЫ ДАННЫХ (Google Firebase Realtime Database)
+   ========================================================================== */
+const firebaseConfig = {
+  databaseURL: "https://cgb-proverki-default-rtdb.europe-west1.firebasedatabase.app"
+};
+
+let db = null;
+try {
+  if (typeof firebase !== 'undefined') {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.database();
+  }
+} catch(e) {
+  console.warn('Firebase init:', e);
+}
+
+// Резервный адаптер если офлайн
+if (!db) {
+  db = {
+    ref(path) {
+      return {
+        once() {
+          const root = path.split('/')[0];
+          let val = null;
+          if (root === 'cgb_proverki') val = data;
+          else if (root === 'cgb_categories') val = categories;
+          else if (root === 'cgb_disciplinary') val = disc;
+          else if (root === 'cgb_users') val = users;
+          return Promise.resolve({ val() { return val; } });
+        },
+        set(newVal) {
+          const parts = path.split('/');
+          const root = parts[0];
+          if (parts.length === 1) {
+            if (root === 'cgb_proverki') data = newVal;
+            else if (root === 'cgb_categories') categories = newVal;
+            else if (root === 'cgb_disciplinary') disc = newVal;
+            else if (root === 'cgb_users') users = newVal;
+          }
+          return Promise.resolve();
+        },
+        update(updates) { return Promise.resolve(); },
+        remove() { return Promise.resolve(); },
+        on(ev, cb) { this.once().then(s => cb(s)); return this; }
+      };
+    }
+  };
+}
+
+/* ==========================================================================
    КРИПТОГРАФИЧЕСКИЙ ДВИЖОК (Web Crypto API: PBKDF2 + AES-GCM 256-bit)
    ========================================================================== */
 const CryptoEngine = {
@@ -1605,67 +1657,6 @@ const EncryptedDB = {
       console.error('Ошибка дешифрования хранилища:', e);
     }
     return false;
-  }
-};
-
-const db = {
-  ref(path) {
-    return {
-      once() {
-        const root = path.split('/')[0];
-        let val = null;
-        if (root === 'cgb_proverki') val = data;
-        else if (root === 'cgb_categories') val = categories;
-        else if (root === 'cgb_disciplinary') val = disc;
-        else if (root === 'cgb_users') val = users;
-        return Promise.resolve({ val() { return val; } });
-      },
-      set(newVal) {
-        const parts = path.split('/');
-        const root = parts[0];
-        if (parts.length === 1) {
-          if (root === 'cgb_proverki') data = newVal;
-          else if (root === 'cgb_categories') categories = newVal;
-          else if (root === 'cgb_disciplinary') disc = newVal;
-          else if (root === 'cgb_users') users = newVal;
-        } else {
-          const sub = parts[1];
-          if (root === 'cgb_disciplinary') {
-            if (parts.length === 3 && parts[2] === 'status') {
-              if (disc[sub]) disc[sub].status = newVal;
-            } else {
-              disc[sub] = newVal;
-            }
-          } else if (root === 'cgb_categories') {
-            categories[sub] = newVal;
-          } else if (root === 'cgb_users') {
-            if (parts.length === 3) {
-              if (users[sub]) users[sub][parts[2]] = newVal;
-            } else {
-              users[sub] = newVal;
-            }
-          }
-        }
-        return EncryptedDB.saveAll();
-      },
-      update(updates) {
-        const parts = path.split('/');
-        const root = parts[0];
-        const sub = parts[1];
-        if (root === 'cgb_users' && users[sub]) {
-          Object.assign(users[sub], updates);
-        }
-        return EncryptedDB.saveAll();
-      },
-      remove() {
-        const parts = path.split('/');
-        const root = parts[0];
-        const sub = parts[1];
-        if (root === 'cgb_disciplinary') delete disc[sub];
-        else if (root === 'cgb_users') delete users[sub];
-        return EncryptedDB.saveAll();
-      }
-    };
   }
 };
 
@@ -1922,13 +1913,33 @@ function openApp() {
   document.getElementById('rT').value = iso(to);
 
   ensure();
-  renderCats();
-  fillCleanup();
+  load();
+
+  // Живая синхронизация со всеми устройствами
+  db.ref('cgb_categories').on('value', s => {
+    categories = s.val() || {};
+    ensureCats();
+    renderCats();
+    fillG();
+    fillCleanup();
+    render();
+  });
+
+  db.ref('cgb_disciplinary').on('value', s => {
+    disc = s.val() || {};
+    renD();
+  });
+
+  db.ref('cgb_users').on('value', s => {
+    users = s.val() || {};
+    if (isAd()) renU();
+  });
+
   renTabs();
   render();
   renD();
   if (isAd()) renU();
-  st(true, (me.name || me.login));
+  st(true, 'Онлайн: ' + (me.name || me.login));
   resetIdleTimer();
 }
 
@@ -2101,7 +2112,9 @@ function sched() {
   clearTimeout(saveT);
   saveT = setTimeout(() => {
     ensure();
-    EncryptedDB.saveAll();
+    db.ref('cgb_proverki').set(data)
+      .then(() => st(true, 'Синхронизировано'))
+      .catch(() => st(false, 'Ошибка связи'));
   }, 350);
 }
 
@@ -3260,15 +3273,21 @@ function fxPulse(el) {
 async function bootApp() {
   try {
     fxUI();
-    // Загружаем данные из защищенного хранилища
-    const loaded = await EncryptedDB.loadAll();
-    if (!loaded || !Object.keys(users).length) {
+    let snap;
+    try {
+      snap = await db.ref('cgb_users').once('value');
+    } catch(e) {
+      console.warn('Users fetch error:', e);
+    }
+    users = (snap && snap.val()) || {};
+
+    if (!Object.keys(users).length) {
       await bootAd();
+      await db.ref('cgb_users').set(users);
       ensureCats();
-      await EncryptedDB.saveAll();
+      await db.ref('cgb_categories').set(categories);
     }
 
-    // Проверяем сохраненную сессию
     const s = loadSes();
     if (s && users[s.id] && users[s.id].active !== false) {
       const u = users[s.id];
@@ -3284,10 +3303,11 @@ async function bootApp() {
       openApp();
     } else {
       document.getElementById('login').style.display = 'flex';
+      st(true, 'База подключена');
     }
   } catch(e) {
     document.getElementById('login').style.display = 'flex';
-    console.error('Boot error:', e);
+    st(false, 'Ошибка: ' + (e && e.message ? e.message : e));
   }
 }
 
