@@ -1228,6 +1228,7 @@ pre.rp {
         <input type="file" id="avF" accept="image/*" style="display:none" onchange="setAv(event)">
         <button onclick="logout()" style="color:#fca5a5">🚪 Выйти</button>
       </div>
+      <button class="btn btn-g btn-sm" onclick="logout()" style="color:var(--text-secondary);padding:6px 12px;font-size:0.82rem;gap:6px" title="Выйти из аккаунта">🚪 Выйти</button>
       <button class="bur" onclick="togSide()">☰</button>
     </div>
   </header>
@@ -1244,6 +1245,9 @@ pre.rp {
       <button class="nb" data-s="admin" id="nA" style="display:none" onclick="go('admin')">⚙️ Администрирование</button>
       <button class="nb" data-s="account" onclick="go('account')">👤 Аккаунт и Безопасность</button>
     </nav>
+    <div style="padding:12px;margin-top:auto;border-top:1px solid var(--border)">
+      <button class="nb" onclick="logout()" style="color:#fb7185;background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.25);width:100%;justify-content:center">🚪 Выйти из аккаунта</button>
+    </div>
   </aside>
 
   <main class="main">
@@ -1416,7 +1420,13 @@ pre.rp {
           <div class="fx-row"><div class="fx-label">Стиль анимации</div><select id="fxAnimStyle" onchange="fxSetStyle(this.value)" style="min-width:150px"><option value="pulse">Мягкое увеличение</option><option value="bounce">Лёгкий bounce</option><option value="glow">Подсветка</option><option value="lift">Подъём</option></select></div>
         </div>
       </div>
-    </section>
+    
+      <div class="fc" style="border-color:rgba(244,63,94,0.3)">
+        <h3 style="color:#fb7185">🚪 Завершение сессии</h3>
+        <p class="hint" style="margin-bottom:14px">Выход из учетной записи на этом устройстве.</p>
+        <button class="btn btn-d" onclick="logout()">Выйти из аккаунта</button>
+      </div>
+</section>
   </main>
 </div>
 
