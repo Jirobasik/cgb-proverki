@@ -1197,11 +1197,7 @@ pre.rp {
 <!-- Login Screen -->
 <div class="auth" id="login" style="display:flex">
   <div class="box">
-    <h1>АБ — Вход</h1>
-    <p class="sub">Защищённая панель проверок личного состава</p>
-    <div style="text-align:center;margin-bottom:16px">
-      <span class="sec-badge">🔒 AES-256-GCM + PBKDF2</span>
-    </div>
+    <h1 style="margin-bottom:20px">Вход</h1>
     <div class="err" id="lErr"></div>
     <div class="f">
       <label>Логин</label>
@@ -1211,12 +1207,9 @@ pre.rp {
       <label>Пароль</label>
       <input id="pIn" type="password" placeholder="Введите пароль" autocomplete="current-password">
     </div>
-    <button class="btn btn-p" id="lBtn" style="width:100%;margin-top:8px" onclick="login()">Войти</button>
-    <div class="hint" id="firstLoginHint" style="text-align:center;margin-top:14px;color:var(--muted);line-height:1.4">
-      По умолчанию: <strong>maksim-milonov-877-506</strong> / <strong>makschinik11</strong><br>
-      <small style="opacity:0.75">Рекомендуется сменить пароль в настройках после первого входа</small>
-    </div>
+    <button class="btn btn-p" id="lBtn" style="width:100%;margin-top:10px" onclick="login()">Войти</button>
   </div>
+</div>
 </div>
 
 <!-- Main App -->
