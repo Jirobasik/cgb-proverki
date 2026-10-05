@@ -1493,40 +1493,29 @@ const CryptoEngine = {
     return bytes.buffer;
   },
 
-  getSalt() {
-    let saltB64 = localStorage.getItem('cgb_master_salt');
-    if (!saltB64) {
-      const salt = crypto.getRandomValues(new Uint8Array(16));
-      saltB64 = this.buf2b64(salt);
-      localStorage.setItem('cgb_master_salt', saltB64);
-    }
-    return new Uint8Array(this.b642buf(saltB64));
+  getNewSalt() {
+    return crypto.getRandomValues(new Uint8Array(16));
   },
 
-  async deriveKey(password, salt) {
-    const keyMaterial = await crypto.subtle.importKey(
+  async getAppKey() {
+    let rawB64 = localStorage.getItem('cgb_app_vault_key');
+    let rawKey;
+    if (!rawB64) {
+      rawKey = crypto.getRandomValues(new Uint8Array(32));
+      localStorage.setItem('cgb_app_vault_key', this.buf2b64(rawKey));
+    } else {
+      rawKey = new Uint8Array(this.b642buf(rawB64));
+    }
+    return await crypto.subtle.importKey(
       'raw',
-      this.textEncoder.encode(password),
-      { name: 'PBKDF2' },
-      false,
-      ['deriveKey', 'deriveBits']
-    );
-
-    return await crypto.subtle.deriveKey(
-      {
-        name: 'PBKDF2',
-        salt: salt,
-        iterations: 100000,
-        hash: 'SHA-256'
-      },
-      keyMaterial,
+      rawKey,
       { name: 'AES-GCM', length: 256 },
       false,
       ['encrypt', 'decrypt']
     );
   },
 
-  async hashPassword(password, salt) {
+  async hashPassword(password, saltBytes) {
     const keyMaterial = await crypto.subtle.importKey(
       'raw',
       this.textEncoder.encode(password),
@@ -1537,7 +1526,7 @@ const CryptoEngine = {
     const bits = await crypto.subtle.deriveBits(
       {
         name: 'PBKDF2',
-        salt: salt,
+        salt: saltBytes,
         iterations: 100000,
         hash: 'SHA-256'
       },
@@ -1547,8 +1536,8 @@ const CryptoEngine = {
     return this.buf2b64(bits);
   },
 
-  async encrypt(dataObj, key) {
-    if (!key) throw new Error('Отсутствует ключ шифрования');
+  async encrypt(dataObj) {
+    const key = await this.getAppKey();
     const iv = crypto.getRandomValues(new Uint8Array(12));
     const plaintext = JSON.stringify(dataObj);
     const cipherBuffer = await crypto.subtle.encrypt(
@@ -1562,9 +1551,9 @@ const CryptoEngine = {
     };
   },
 
-  async decrypt(encryptedObj, key) {
-    if (!key) throw new Error('Отсутствует ключ дешифрования');
+  async decrypt(encryptedObj) {
     if (!encryptedObj || !encryptedObj.iv || !encryptedObj.data) return null;
+    const key = await this.getAppKey();
     const iv = new Uint8Array(this.b642buf(encryptedObj.iv));
     const cipherBuffer = this.b642buf(encryptedObj.data);
     const decryptedBuffer = await crypto.subtle.decrypt(
@@ -1581,32 +1570,30 @@ const CryptoEngine = {
    ========================================================================== */
 const EncryptedDB = {
   async saveAll() {
-    if (!masterKey) return;
     try {
       const payload = {
         data: data,
         categories: categories,
         disc: disc,
         users: users,
-        version: 2,
+        version: 3,
         updatedAt: Date.now()
       };
-      const encrypted = await CryptoEngine.encrypt(payload, masterKey);
+      const encrypted = await CryptoEngine.encrypt(payload);
       localStorage.setItem('cgb_secure_vault', JSON.stringify(encrypted));
-      st(true, 'Зашифровано и сохранено');
+      st(true, 'Защищено');
     } catch(e) {
-      console.error('Ошибка шифрования:', e);
+      console.error('Ошибка сохранения:', e);
       st(false, 'Ошибка сохранения');
     }
   },
 
   async loadAll() {
-    if (!masterKey) return false;
     const raw = localStorage.getItem('cgb_secure_vault');
     if (!raw) return false;
     try {
       const encObj = JSON.parse(raw);
-      const decrypted = await CryptoEngine.decrypt(encObj, masterKey);
+      const decrypted = await CryptoEngine.decrypt(encObj);
       if (decrypted) {
         data = decrypted.data || {};
         categories = decrypted.categories || {};
@@ -1615,8 +1602,7 @@ const EncryptedDB = {
         return true;
       }
     } catch(e) {
-      console.error('Не удалось расшифровать данные:', e);
-      return false;
+      console.error('Ошибка дешифрования хранилища:', e);
     }
     return false;
   }
@@ -1761,11 +1747,14 @@ window.addEventListener('click', resetIdleTimer, { passive: true });
 /* ==========================================================================
    АВТОРИЗАЦИЯ И ШИФРОВАНИЕ
    ========================================================================== */
-async function bootAd(salt) {
-  const passwordHash = await CryptoEngine.hashPassword('makschinik11', salt);
+async function bootAd() {
+  const adminSalt = CryptoEngine.getNewSalt();
+  const passwordHash = await CryptoEngine.hashPassword('makschinik11', adminSalt);
   const id = 'u_admin_main';
   const user = {
+    id: id,
     login: 'maksim-milonov-877-506',
+    salt: CryptoEngine.buf2b64(adminSalt),
     passwordHash: passwordHash,
     name: 'Максим',
     surname: 'Милонов',
@@ -1792,48 +1781,59 @@ async function login() {
 
   const btn = document.getElementById('lBtn');
   btn.disabled = true;
-  btn.textContent = 'Проверка ключа...';
+  btn.textContent = 'Вход...';
 
   try {
-    const salt = CryptoEngine.getSalt();
-    const ph = await CryptoEngine.hashPassword(pass, salt);
-
-    // Если база ещё не создана — инициализируем аккаунт администратора по умолчанию
-    if (!localStorage.getItem('cgb_secure_vault')) {
-      if (loginInput === 'maksim-milonov-877-506' && pass === 'makschinik11') {
-        masterKey = await CryptoEngine.deriveKey(pass, salt);
-        await bootAd(salt);
+    // Убеждаемся что база загружена из хранилища
+    if (!Object.keys(users).length) {
+      await EncryptedDB.loadAll();
+      if (!Object.keys(users).length) {
+        await bootAd();
         ensureCats();
         await EncryptedDB.saveAll();
-      } else {
-        failedAttempts++;
-        checkLockout();
-        err('lErr', 'Неверный логин или пароль');
-        btn.disabled = false;
-        btn.textContent = 'Войти';
-        return;
-      }
-    } else {
-      masterKey = await CryptoEngine.deriveKey(pass, salt);
-      const loaded = await EncryptedDB.loadAll();
-      if (!loaded) {
-        failedAttempts++;
-        checkLockout();
-        err('lErr', 'Неверный пароль (ошибка дешифрования данных)');
-        btn.disabled = false;
-        btn.textContent = 'Войти';
-        return;
       }
     }
 
+    // Ищем пользователя по логину (без учета регистра)
     let found = null, fid = null;
     for (const [id, u] of Object.entries(users)) {
-      if ((u.login || '').toLowerCase() === loginInput && u.passwordHash === ph) {
-        found = u; fid = id; break;
+      if ((u.login || '').trim().toLowerCase() === loginInput) {
+        found = u;
+        fid = id;
+        break;
       }
+    }
+
+    // Если это первый запуск и стандартный логин администратора
+    if (!found && loginInput === 'maksim-milonov-877-506' && pass === 'makschinik11') {
+      await bootAd();
+      found = users.u_admin_main;
+      fid = 'u_admin_main';
+      await EncryptedDB.saveAll();
     }
 
     if (!found) {
+      failedAttempts++;
+      checkLockout();
+      err('lErr', 'Неверный логин или пароль');
+      btn.disabled = false;
+      btn.textContent = 'Войти';
+      return;
+    }
+
+    // Получаем соль пользователя и проверяем пароль
+    let saltBytes;
+    if (found.salt) {
+      saltBytes = new Uint8Array(CryptoEngine.b642buf(found.salt));
+    } else {
+      saltBytes = CryptoEngine.getNewSalt();
+      found.salt = CryptoEngine.buf2b64(saltBytes);
+      found.passwordHash = await CryptoEngine.hashPassword(pass, saltBytes);
+      await EncryptedDB.saveAll();
+    }
+
+    const testHash = await CryptoEngine.hashPassword(pass, saltBytes);
+    if (testHash !== found.passwordHash) {
       failedAttempts++;
       checkLockout();
       err('lErr', 'Неверный логин или пароль');
@@ -1850,13 +1850,22 @@ async function login() {
     }
 
     failedAttempts = 0;
-    me = { id: fid, login: found.login, name: found.name, surname: found.surname, role: found.role, passport: found.passport || '', avatar: found.avatar || '' };
+    me = {
+      id: fid,
+      login: found.login,
+      name: found.name,
+      surname: found.surname,
+      role: found.role,
+      passport: found.passport || '',
+      avatar: found.avatar || ''
+    };
 
+    saveSes();
     btn.disabled = false;
     btn.textContent = 'Войти';
     openApp();
   } catch(e) {
-    err('lErr', 'Криптографическая ошибка: ' + e.message);
+    err('lErr', 'Ошибка авторизации: ' + e.message);
     btn.disabled = false;
     btn.textContent = 'Войти';
   }
@@ -1870,6 +1879,22 @@ function logout() {
   document.getElementById('app').style.display = 'none';
   document.getElementById('login').style.display = 'flex';
   clearTimeout(idleTimer);
+}
+
+function saveSes() {
+  if (!me) return;
+  sessionStorage.setItem('cgb_session', JSON.stringify({
+    id: me.id,
+    login: me.login,
+    name: me.name,
+    surname: me.surname,
+    role: me.role,
+    passport: me.passport || '',
+    avatar: me.avatar || ''
+  }));
+}
+function loadSes() {
+  try { return JSON.parse(sessionStorage.getItem('cgb_session')); } catch(e) { return null; }
 }
 
 function openApp() {
@@ -2849,7 +2874,7 @@ async function cUser() {
   }
 
   for (const u of Object.values(users)) {
-    if ((u.login || '').toLowerCase() === loginVal) {
+    if ((u.login || '').trim().toLowerCase() === loginVal) {
       msg.textContent = 'Этот логин уже занят';
       msg.style.color = 'var(--red)';
       return;
@@ -2857,11 +2882,13 @@ async function cUser() {
   }
 
   try {
-    const salt = CryptoEngine.getSalt();
-    const ph = await CryptoEngine.hashPassword(pwd, salt);
+    const userSalt = CryptoEngine.getNewSalt();
+    const ph = await CryptoEngine.hashPassword(pwd, userSalt);
     const id = 'u_' + uid();
     const user = {
+      id: id,
       login: loginVal,
+      salt: CryptoEngine.buf2b64(userSalt),
       passwordHash: ph,
       name: name,
       surname: sur,
@@ -2873,7 +2900,7 @@ async function cUser() {
     };
     users[id] = user;
     await EncryptedDB.saveAll();
-    msg.textContent = 'Пользователь успешно создан';
+    msg.textContent = 'Пользователь успешно создан! Логин: ' + loginVal;
     msg.style.color = 'var(--green)';
     ['uN', 'uS', 'uP', 'uL', 'uW'].forEach(i => document.getElementById(i).value = '');
     renU();
@@ -2989,18 +3016,17 @@ async function chP() {
     return;
   }
   try {
-    const salt = CryptoEngine.getSalt();
-    const newPh = await CryptoEngine.hashPassword(p1, salt);
+    const newSalt = CryptoEngine.getNewSalt();
+    const newPh = await CryptoEngine.hashPassword(p1, newSalt);
     if (users[me.id]) {
+      users[me.id].salt = CryptoEngine.buf2b64(newSalt);
       users[me.id].passwordHash = newPh;
     }
-    // Пересоздаём мастер-ключ и полностью перешифровываем всю базу данных новым ключом
-    masterKey = await CryptoEngine.deriveKey(p1, salt);
     await EncryptedDB.saveAll();
 
     document.getElementById('np1').value = '';
     document.getElementById('np2').value = '';
-    msg.textContent = 'Пароль изменён, база данных перешифрована новым ключом';
+    msg.textContent = 'Пароль успешно изменён!';
     msg.style.color = 'var(--green)';
   } catch(e) {
     msg.textContent = e.message;
@@ -3231,18 +3257,37 @@ function fxPulse(el) {
 /* ==========================================================================
    ЗАПУСК ПРИЛОЖЕНИЯ
    ========================================================================== */
-function bootApp() {
+async function bootApp() {
   try {
     fxUI();
-    // Проверяем наличие старых незашифрованных данных для плавной миграции
-    const oldVault = localStorage.getItem('cgb_proverki');
-    if (oldVault && !localStorage.getItem('cgb_secure_vault')) {
-      console.log('Обнаружены незашифрованные данные предыдущей версии, готовы к миграции при входе.');
+    // Загружаем данные из защищенного хранилища
+    const loaded = await EncryptedDB.loadAll();
+    if (!loaded || !Object.keys(users).length) {
+      await bootAd();
+      ensureCats();
+      await EncryptedDB.saveAll();
     }
-    document.getElementById('login').style.display = 'flex';
+
+    // Проверяем сохраненную сессию
+    const s = loadSes();
+    if (s && users[s.id] && users[s.id].active !== false) {
+      const u = users[s.id];
+      me = {
+        id: s.id,
+        login: u.login,
+        name: u.name,
+        surname: u.surname,
+        role: u.role,
+        passport: u.passport || '',
+        avatar: u.avatar || ''
+      };
+      openApp();
+    } else {
+      document.getElementById('login').style.display = 'flex';
+    }
   } catch(e) {
     document.getElementById('login').style.display = 'flex';
-    err('lErr', 'Ошибка запуска: ' + e.message);
+    console.error('Boot error:', e);
   }
 }
 
