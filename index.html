@@ -4,37 +4,40 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>АБ — Панель управления (Личный состав)</title>
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-database-compat.js"></script>
 <style>
 :root {
-  --bg: #0d121b;
-  --bg-subtle: #121926;
-  --card: #16202f;
-  --card-hover: #1b273a;
-  --card-inner: #0f1622;
+  --bg: #07090e;
+  --bg-subtle: #0d121c;
+  --card: #131926;
+  --card-hover: #172033;
+  --card-inner: #0a0e17;
   --border: rgba(255, 255, 255, 0.08);
-  --border-subtle: rgba(255, 255, 255, 0.05);
-  --border-focus: rgba(99, 140, 255, 0.45);
-  --text: #edf2f7;
-  --text-secondary: #94a3b8;
-  --muted: #64748b;
+  --border-hover: rgba(255, 255, 255, 0.16);
+  --border-focus: rgba(59, 130, 246, 0.5);
+  --text: #f0f6fc;
+  --text-secondary: #8b949e;
+  --muted: #6e7681;
   --accent: #3b82f6;
-  --accent-soft: rgba(59, 130, 246, 0.12);
-  --accent-hover: #2563eb;
-  --green: #10b981;
-  --green-soft: rgba(16, 185, 129, 0.12);
-  --green-border: rgba(16, 185, 129, 0.3);
-  --red: #f43f5e;
-  --red-soft: rgba(244, 63, 94, 0.12);
-  --red-border: rgba(244, 63, 94, 0.3);
-  --yellow: #f59e0b;
-  --yellow-soft: rgba(245, 158, 11, 0.12);
-  --purple: #8b5cf6;
+  --accent-glow: rgba(59, 130, 246, 0.35);
+  --green: #238636;
+  --green-bright: #3fb950;
+  --green-soft: rgba(46, 160, 67, 0.15);
+  --green-border: rgba(46, 160, 67, 0.4);
+  --red: #da3633;
+  --red-bright: #f85149;
+  --red-soft: rgba(248, 81, 73, 0.15);
+  --red-border: rgba(248, 81, 73, 0.4);
+  --yellow: #d29922;
+  --yellow-soft: rgba(210, 153, 34, 0.15);
+  --purple: #8957e5;
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 4px 16px -2px rgba(0, 0, 0, 0.35);
-  --shadow-lg: 0 10px 30px -4px rgba(0, 0, 0, 0.5);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 20px -2px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 12px 36px -4px rgba(0, 0, 0, 0.6);
 }
 
 * {
@@ -46,22 +49,24 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   background-color: var(--bg);
+  background-image: 
+    radial-gradient(ellipse 70% 40% at 50% -10%, rgba(56, 189, 248, 0.09) 0%, transparent 70%),
+    radial-gradient(circle at 90% 90%, rgba(99, 102, 241, 0.06) 0%, transparent 60%),
+    radial-gradient(circle at 10% 80%, rgba(16, 185, 129, 0.04) 0%, transparent 50%);
+  background-attachment: fixed;
   color: var(--text);
   min-height: 100vh;
   line-height: 1.5;
+  letter-spacing: -0.012em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background: 
-    radial-gradient(circle at 15% 15%, rgba(59, 130, 246, 0.05), transparent 40%),
-    radial-gradient(circle at 85% 85%, rgba(139, 92, 246, 0.04), transparent 45%);
-  pointer-events: none;
-  z-index: 0;
+/* SVG Icon Helper */
+.svg-ic {
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
 }
 
 /* Auth Screens */
@@ -76,39 +81,33 @@ body::before {
 }
 
 .box {
-  background: var(--card);
+  background: linear-gradient(180deg, rgba(22, 30, 46, 0.85) 0%, rgba(14, 19, 31, 0.95) 100%);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 32px;
+  padding: 36px;
   width: 100%;
-  max-width: 420px;
-  box-shadow: var(--shadow-lg);
-  backdrop-filter: blur(12px);
+  max-width: 400px;
+  box-shadow: var(--shadow-lg), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .box h1 {
   text-align: center;
-  font-size: 1.4rem;
+  font-size: 1.45rem;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
   color: #fff;
-  margin-bottom: 6px;
-}
-
-.sub {
-  text-align: center;
-  color: var(--text-secondary);
-  font-size: 0.9rem;
-  margin-bottom: 22px;
+  margin-bottom: 24px;
 }
 
 .f {
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 
 .f label {
   display: block;
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-weight: 500;
   color: var(--text-secondary);
   margin-bottom: 6px;
@@ -117,35 +116,37 @@ body::before {
 .f input, .f select, input, select {
   width: 100%;
   padding: 10px 14px;
-  border-radius: var(--radius-sm);
+  border-radius: 9px;
   border: 1px solid var(--border);
   background: var(--card-inner);
   color: var(--text);
   font: inherit;
   font-size: 0.9rem;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition: all 0.15s ease;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .f input:focus, select:focus, input:focus {
   outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2), inset 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-/* Buttons */
+/* GitHub / Linear Style Tactile Buttons */
 .btn {
   cursor: pointer;
   font-weight: 600;
-  border: none;
-  border-radius: var(--radius-sm);
-  padding: 9px 15px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  padding: 8px 15px;
   font: inherit;
   font-size: 0.88rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  gap: 7px;
+  user-select: none;
+  transition: all 0.16s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .btn:active {
@@ -153,64 +154,81 @@ body::before {
 }
 
 .btn-p {
-  background: var(--accent);
+  background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
+  border-color: #3b82f6;
   color: #fff;
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
+  box-shadow: 0 0 14px rgba(37, 99, 235, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
 .btn-p:hover {
-  background: var(--accent-hover);
-  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+  background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+  box-shadow: 0 0 20px rgba(37, 99, 235, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  transform: translateY(-1px);
 }
 
 .btn-s {
-  background: var(--green-soft);
-  color: #34d399;
-  border: 1px solid var(--green-border);
+  background: linear-gradient(180deg, rgba(35, 134, 54, 0.25) 0%, rgba(35, 134, 54, 0.15) 100%);
+  color: var(--green-bright);
+  border-color: var(--green-border);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .btn-s:hover {
-  background: rgba(16, 185, 129, 0.22);
-  color: #6ee7b7;
+  background: linear-gradient(180deg, rgba(46, 160, 67, 0.35) 0%, rgba(35, 134, 54, 0.25) 100%);
+  border-color: rgba(63, 185, 80, 0.6);
+  color: #fff;
+  transform: translateY(-1px);
 }
 
 .btn-d {
-  background: var(--red-soft);
-  color: #fb7185;
-  border: 1px solid var(--red-border);
+  background: linear-gradient(180deg, rgba(218, 54, 51, 0.25) 0%, rgba(218, 54, 51, 0.15) 100%);
+  color: var(--red-bright);
+  border-color: var(--red-border);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .btn-d:hover {
-  background: rgba(244, 63, 94, 0.22);
-  color: #fda4af;
+  background: linear-gradient(180deg, rgba(248, 81, 73, 0.35) 0%, rgba(218, 54, 51, 0.25) 100%);
+  border-color: rgba(248, 81, 73, 0.6);
+  color: #fff;
+  transform: translateY(-1px);
 }
 
 .btn-g {
   background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--border);
+  border-color: var(--border);
   color: var(--text-secondary);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .btn-g:hover {
   background: rgba(255, 255, 255, 0.08);
+  border-color: var(--border-hover);
   color: var(--text);
-  border-color: rgba(255, 255, 255, 0.14);
+  transform: translateY(-1px);
 }
 
 .btn-sm {
-  padding: 5px 10px;
+  padding: 5px 11px;
   font-size: 0.8rem;
-  border-radius: 6px;
+  border-radius: 7px;
+}
+
+.btn-icon {
+  padding: 6px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
 }
 
 .err {
   background: var(--red-soft);
   border: 1px solid var(--red-border);
   color: #fca5a5;
-  padding: 10px 14px;
+  padding: 11px 14px;
   border-radius: var(--radius-sm);
   font-size: 0.86rem;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
   display: none;
 }
 
@@ -222,14 +240,14 @@ body::before {
 .sec-badge {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   font-size: 0.74rem;
   font-weight: 600;
   padding: 3px 10px;
   border-radius: 999px;
   background: rgba(16, 185, 129, 0.12);
   color: #34d399;
-  border: 1px solid rgba(16, 185, 129, 0.25);
+  border: 1px solid rgba(16, 185, 129, 0.28);
 }
 
 /* Top App Header */
@@ -246,31 +264,33 @@ body::before {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px 24px;
-  background: rgba(13, 18, 27, 0.82);
+  padding: 12px 24px;
+  background: rgba(7, 9, 14, 0.82);
   border-bottom: 1px solid var(--border);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .top h1 {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 700;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
   color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .top h1 span {
   color: var(--text-secondary);
   font-weight: 500;
-  font-size: 0.88rem;
-  margin-left: 4px;
+  font-size: 0.85rem;
 }
 
 .tr {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   position: relative;
 }
 
@@ -278,13 +298,13 @@ body::before {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 500;
   padding: 4px 12px;
   border-radius: 999px;
-  background: rgba(16, 185, 129, 0.1);
-  border: 1px solid rgba(16, 185, 129, 0.25);
-  color: #34d399;
+  background: rgba(46, 160, 67, 0.12);
+  border: 1px solid rgba(46, 160, 67, 0.3);
+  color: var(--green-bright);
 }
 
 .dot {
@@ -295,13 +315,13 @@ body::before {
 }
 
 .dot.on {
-  background: var(--green);
-  box-shadow: 0 0 6px var(--green);
+  background: var(--green-bright);
+  box-shadow: 0 0 8px var(--green-bright);
 }
 
 .dot.off {
-  background: var(--red);
-  box-shadow: 0 0 6px var(--red);
+  background: var(--red-bright);
+  box-shadow: 0 0 8px var(--red-bright);
 }
 
 .av {
@@ -316,14 +336,14 @@ body::before {
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  color: var(--accent);
-  font-size: 0.85rem;
-  transition: border-color 0.15s, transform 0.15s;
+  color: #38bdf8;
+  font-size: 0.82rem;
+  transition: all 0.15s;
 }
 
 .av:hover {
-  border-color: var(--accent);
-  transform: scale(1.04);
+  border-color: #38bdf8;
+  transform: scale(1.05);
 }
 
 .av img {
@@ -336,16 +356,16 @@ body::before {
 .drop {
   position: absolute;
   top: 48px;
-  right: 48px;
+  right: 50px;
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  min-width: 200px;
+  min-width: 190px;
   padding: 6px;
   display: none;
   z-index: 60;
-  box-shadow: var(--shadow-lg);
-  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
 }
 
 .drop.open {
@@ -355,16 +375,16 @@ body::before {
 .drop button {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   width: 100%;
   text-align: left;
   padding: 9px 12px;
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: 7px;
   background: transparent;
   color: var(--text);
   font: inherit;
-  font-size: 0.88rem;
+  font-size: 0.86rem;
   cursor: pointer;
   transition: background 0.12s;
 }
@@ -380,7 +400,6 @@ body::before {
   border: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.03);
   color: var(--text);
-  font-size: 1.1rem;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -389,8 +408,8 @@ body::before {
 }
 
 .bur:hover {
-  background: rgba(255, 255, 255, 0.07);
-  border-color: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--border-hover);
 }
 
 /* Sidebar Drawer */
@@ -399,15 +418,15 @@ body::before {
   top: 0;
   right: 0;
   bottom: 0;
-  width: 270px;
-  background: #0a0f17;
+  width: 275px;
+  background: #080b11;
   border-left: 1px solid var(--border);
   z-index: 100;
   transform: translateX(100%);
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   flex-direction: column;
-  box-shadow: -8px 0 28px rgba(0, 0, 0, 0.5);
+  box-shadow: -10px 0 32px rgba(0, 0, 0, 0.6);
 }
 
 .side.open {
@@ -417,8 +436,8 @@ body::before {
 .ov {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(3px);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
   z-index: 99;
   opacity: 0;
   pointer-events: none;
@@ -439,7 +458,7 @@ body::before {
 }
 
 .sh strong {
-  font-size: 1rem;
+  font-size: 0.96rem;
   letter-spacing: -0.01em;
 }
 
@@ -459,7 +478,7 @@ body::before {
   background: transparent;
   color: var(--text-secondary);
   font: inherit;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 500;
   cursor: pointer;
   margin-bottom: 4px;
@@ -469,20 +488,21 @@ body::before {
 
 .nb:hover {
   color: var(--text);
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .nb.a {
-  background: var(--accent);
+  background: linear-gradient(180deg, #1f293d 0%, #161f30 100%);
   color: #fff;
   font-weight: 600;
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 /* Main Container */
 .main {
   padding: 24px 20px 48px;
-  max-width: 1000px;
+  max-width: 1040px;
   margin: 0 auto;
 }
 
@@ -495,49 +515,50 @@ body::before {
 }
 
 .tit {
-  font-size: 1.3rem;
+  font-size: 1.35rem;
   font-weight: 700;
-  letter-spacing: -0.02em;
-  margin-bottom: 18px;
+  letter-spacing: -0.025em;
+  margin-bottom: 20px;
   color: #fff;
 }
 
-/* Tabs Navigation */
+/* Department Segmented Tabs */
 .tabs {
-  display: flex;
+  display: inline-flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px;
-  background: rgba(255, 255, 255, 0.02);
+  gap: 4px;
+  background: rgba(13, 18, 28, 0.9);
   padding: 4px;
   border-radius: 12px;
   border: 1px solid var(--border);
   margin-bottom: 14px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .tab {
   background: transparent;
-  border: none;
+  border: 1px solid transparent;
   color: var(--text-secondary);
-  padding: 8px 16px;
-  border-radius: 9px;
+  padding: 7px 16px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 0.88rem;
+  font-size: 0.86rem;
   font-weight: 500;
   transition: all 0.15s ease;
 }
 
 .tab:hover {
-  color: var(--text);
+  color: #fff;
   background: rgba(255, 255, 255, 0.05);
 }
 
 .tab.a {
-  background: var(--card);
+  background: linear-gradient(180deg, #1e293b 0%, #111827 100%);
   color: #fff;
   font-weight: 600;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 /* Search Bar */
@@ -546,17 +567,18 @@ body::before {
   align-items: center;
   gap: 10px;
   margin-bottom: 16px;
-  padding: 8px 14px;
-  background: var(--card);
+  padding: 6px 14px;
+  background: linear-gradient(180deg, rgba(20, 27, 43, 0.6) 0%, rgba(14, 19, 31, 0.8) 100%);
   border-radius: var(--radius-md);
   border: 1px solid var(--border);
   position: relative;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.05);
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .sr:focus-within {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .sr input {
@@ -596,7 +618,7 @@ body::before {
   padding: 10px 14px;
   cursor: pointer;
   font-size: 0.88rem;
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   transition: background 0.12s;
 }
 
@@ -605,40 +627,50 @@ body::before {
 }
 
 .si:hover {
-  background: rgba(59, 130, 246, 0.12);
+  background: rgba(56, 189, 248, 0.12);
 }
 
-/* Add Employee Bar */
+/* Add Employee Executive Dock */
 .add-bar {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  align-items: center;
-  margin-bottom: 16px;
-  padding: 14px 18px;
-  background: var(--card);
-  border-radius: var(--radius-md);
+  gap: 12px;
+  align-items: flex-end;
+  margin-bottom: 20px;
+  padding: 16px 20px;
+  background: linear-gradient(180deg, rgba(20, 27, 43, 0.75) 0%, rgba(14, 19, 31, 0.85) 100%);
+  border-radius: 14px;
   border: 1px solid var(--border);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.4), inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
+}
+
+.add-inputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  flex: 1;
 }
 
 .add-col {
   display: flex;
-  align-items: center;
-  gap: 6px;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+  min-width: 110px;
 }
 
 .add-col label {
-  font-size: 0.82rem;
-  font-weight: 500;
+  font-size: 0.78rem;
+  font-weight: 600;
   color: var(--text-secondary);
-  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .add-col input, .add-col select {
-  padding: 8px 12px;
-  font-size: 0.86rem;
-  border-radius: 7px;
+  padding: 9px 12px;
+  font-size: 0.88rem;
+  border-radius: 8px;
 }
 
 /* Category Management Bar */
@@ -650,7 +682,7 @@ body::before {
   gap: 10px;
   margin-bottom: 16px;
   padding: 10px 16px;
-  background: rgba(22, 32, 47, 0.6);
+  background: rgba(18, 24, 38, 0.6);
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
 }
@@ -670,9 +702,9 @@ body::before {
   border-radius: 999px;
   font-size: 0.78rem;
   font-weight: 500;
-  background: rgba(59, 130, 246, 0.1);
-  border: 1px solid rgba(59, 130, 246, 0.22);
-  color: #93c5fd;
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.22);
+  color: #7dd3fc;
 }
 
 .cat-chip .chip-btn {
@@ -682,7 +714,8 @@ body::before {
   cursor: pointer;
   padding: 0 2px;
   opacity: 0.65;
-  font-size: 0.75rem;
+  display: inline-flex;
+  align-items: center;
   transition: opacity 0.15s;
 }
 
@@ -690,43 +723,76 @@ body::before {
   opacity: 1;
 }
 
-/* Filter Checkbox */
-.only-wrap {
+/* Single Elegant Filter Pill Toggle */
+.filter-dock {
   display: flex;
   align-items: center;
-  justify-content: center;
-  margin: 12px 0;
+  margin: 14px 0 16px;
 }
 
-.only-wrap label {
+.toggle-pill {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.86rem;
-  color: var(--text-secondary);
+  gap: 10px;
+  padding: 6px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: 999px;
   cursor: pointer;
-  padding: 5px 12px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid transparent;
+  user-select: none;
   transition: all 0.15s;
 }
 
-.only-wrap label:hover {
-  color: var(--text);
-  background: rgba(255, 255, 255, 0.05);
+.toggle-pill:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--border-hover);
 }
 
-.only-wrap input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  accent-color: var(--accent);
-  cursor: pointer;
+.toggle-pill input {
+  display: none;
+}
+
+.toggle-switch {
+  width: 34px;
+  height: 18px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.toggle-switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  background: #94a3b8;
+  border-radius: 50%;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.toggle-pill input:checked + .toggle-switch {
+  background: #2563eb;
+  box-shadow: 0 0 10px rgba(37, 99, 235, 0.4);
+}
+
+.toggle-pill input:checked + .toggle-switch::after {
+  transform: translateX(16px);
+  background: #fff;
+}
+
+.toggle-label {
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+  font-weight: 500;
 }
 
 /* Category Groups */
 .cat-group {
-  margin: 20px 0 12px;
+  margin: 22px 0 12px;
 }
 
 .cat-header {
@@ -734,40 +800,40 @@ body::before {
   align-items: center;
   justify-content: space-between;
   padding: 10px 16px;
-  border-radius: var(--radius-sm);
+  border-radius: 10px;
   font-weight: 600;
-  font-size: 0.92rem;
-  margin-bottom: 8px;
-  backdrop-filter: blur(8px);
-  transition: all 0.15s;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+  backdrop-filter: blur(12px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .cat-header.hue-0 {
-  background: rgba(59, 130, 246, 0.09);
-  border: 1px solid rgba(59, 130, 246, 0.22);
+  background: linear-gradient(90deg, rgba(37, 99, 235, 0.14) 0%, rgba(20, 27, 43, 0.4) 100%);
+  border: 1px solid rgba(59, 130, 246, 0.25);
   color: #93c5fd;
 }
 
 .cat-header.hue-1 {
-  background: rgba(139, 92, 246, 0.09);
-  border: 1px solid rgba(139, 92, 246, 0.22);
-  color: #c4b5fd;
+  background: linear-gradient(90deg, rgba(137, 87, 229, 0.14) 0%, rgba(20, 27, 43, 0.4) 100%);
+  border: 1px solid rgba(137, 87, 229, 0.25);
+  color: #d8b4fe;
 }
 
 .cat-header.hue-2 {
-  background: rgba(16, 185, 129, 0.09);
-  border: 1px solid rgba(16, 185, 129, 0.22);
-  color: #6ee7b7;
+  background: linear-gradient(90deg, rgba(35, 134, 54, 0.14) 0%, rgba(20, 27, 43, 0.4) 100%);
+  border: 1px solid rgba(46, 160, 67, 0.25);
+  color: #86efac;
 }
 
 .cat-header.hue-3 {
-  background: rgba(245, 158, 11, 0.09);
-  border: 1px solid rgba(245, 158, 11, 0.22);
-  color: #fde68a;
+  background: linear-gradient(90deg, rgba(210, 153, 34, 0.14) 0%, rgba(20, 27, 43, 0.4) 100%);
+  border: 1px solid rgba(210, 153, 34, 0.25);
+  color: #fde047;
 }
 
 .cat-header.hue-none {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.02);
   border: 1px dashed var(--border);
   color: var(--text-secondary);
 }
@@ -779,12 +845,12 @@ body::before {
 }
 
 .cat-count {
-  font-size: 0.74rem;
-  font-weight: 500;
-  background: rgba(0, 0, 0, 0.25);
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: rgba(0, 0, 0, 0.3);
   padding: 2px 8px;
   border-radius: 999px;
-  opacity: 0.85;
+  opacity: 0.9;
 }
 
 .cat-actions {
@@ -793,24 +859,26 @@ body::before {
   gap: 6px;
 }
 
-/* Employee Card */
+/* Employee Card (Juicy Tactile Look) */
 .card {
-  background: var(--card);
+  background: linear-gradient(180deg, rgba(20, 27, 43, 0.7) 0%, rgba(14, 19, 31, 0.85) 100%);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: 14px 18px;
   margin-bottom: 10px;
-  box-shadow: var(--shadow-sm);
-  transition: border-color 0.18s, box-shadow 0.18s, transform 0.18s;
+  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.4), inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .card:hover {
-  border-color: rgba(255, 255, 255, 0.14);
+  border-color: var(--border-hover);
+  box-shadow: 0 8px 24px -2px rgba(0, 0, 0, 0.55), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
 }
 
 .card.hi {
-  border-color: var(--accent);
-  box-shadow: 0 0 16px rgba(59, 130, 246, 0.35);
+  border-color: #38bdf8;
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.35);
 }
 
 .card-top {
@@ -837,18 +905,18 @@ body::before {
 .nm {
   font-weight: 600;
   font-size: 0.98rem;
-  color: #f8fafc;
+  color: #fff;
   letter-spacing: -0.01em;
 }
 
 .ps {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   color: var(--text-secondary);
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   background: rgba(255, 255, 255, 0.04);
   padding: 2px 7px;
   border-radius: 5px;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .card-meta {
@@ -870,9 +938,9 @@ body::before {
   font-size: 0.72rem;
   padding: 2px 8px;
   border-radius: 6px;
-  background: rgba(59, 130, 246, 0.1);
-  color: #93c5fd;
-  border: 1px solid rgba(59, 130, 246, 0.2);
+  background: rgba(56, 189, 248, 0.1);
+  color: #7dd3fc;
+  border: 1px solid rgba(56, 189, 248, 0.22);
   font-weight: 500;
 }
 
@@ -890,7 +958,7 @@ body::before {
   justify-content: flex-end;
 }
 
-/* Checkboxes Grid - 5 Columns */
+/* Checkboxes Grid - 5 Equal, Symmetrical Tiles */
 .cks {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -902,17 +970,18 @@ body::before {
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  background: var(--card-inner);
+  background: linear-gradient(180deg, rgba(16, 22, 36, 0.6) 0%, rgba(11, 15, 24, 0.8) 100%);
   padding: 9px 6px;
   border-radius: 9px;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   text-align: center;
   min-height: 80px;
-  transition: border-color 0.15s, background 0.15s;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition: all 0.15s ease;
 }
 
 .ck:hover {
-  border-color: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.14);
 }
 
 .ck-label {
@@ -928,62 +997,66 @@ body::before {
   font-weight: 500;
 }
 
-/* Status Buttons */
+/* Tactile Status Buttons */
 .sb {
   width: 32px;
   height: 32px;
-  border-radius: 7px;
-  border: 1px solid var(--border);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.03);
   color: var(--muted);
   cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.95rem;
-  font-weight: 700;
-  transition: all 0.15s ease;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .sb:hover:not(:disabled) {
-  border-color: var(--accent);
+  border-color: rgba(255, 255, 255, 0.25);
   color: var(--text);
-  background: rgba(59, 130, 246, 0.08);
+  transform: scale(1.08);
 }
 
 .sb.ok {
-  background: var(--green-soft);
-  border-color: var(--green-border);
-  color: #34d399;
+  background: linear-gradient(180deg, rgba(46, 160, 67, 0.3) 0%, rgba(35, 134, 54, 0.2) 100%);
+  border-color: rgba(63, 185, 80, 0.6);
+  color: var(--green-bright);
+  box-shadow: 0 0 12px rgba(46, 160, 67, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .sb.bad {
-  background: var(--red-soft);
-  border-color: var(--red-border);
-  color: #fb7185;
+  background: linear-gradient(180deg, rgba(248, 81, 73, 0.3) 0%, rgba(218, 54, 51, 0.2) 100%);
+  border-color: rgba(248, 81, 73, 0.6);
+  color: var(--red-bright);
+  box-shadow: 0 0 12px rgba(248, 81, 73, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .sb:disabled {
-  opacity: 0.45;
+  opacity: 0.4;
   cursor: not-allowed;
 }
 
 /* Forms & Panels */
 .fc {
-  background: var(--card);
+  background: linear-gradient(180deg, rgba(20, 27, 43, 0.75) 0%, rgba(14, 19, 31, 0.85) 100%);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  padding: 18px 20px;
-  margin-bottom: 14px;
-  box-shadow: var(--shadow-sm);
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4), inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
 }
 
 .fc h3 {
   margin-bottom: 14px;
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 600;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
   color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .fr {
@@ -1014,9 +1087,9 @@ body::before {
   font-weight: 500;
 }
 
-.ra { background: rgba(139, 92, 246, 0.15); color: #c4b5fd; border: 1px solid rgba(139, 92, 246, 0.25); }
-.rs { background: rgba(59, 130, 246, 0.15); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.25); }
-.re { background: rgba(100, 116, 139, 0.15); color: #94a3b8; border: 1px solid rgba(100, 116, 139, 0.25); }
+.ra { background: rgba(137, 87, 229, 0.15); color: #d8b4fe; border: 1px solid rgba(137, 87, 229, 0.3); }
+.rs { background: rgba(56, 189, 248, 0.15); color: #7dd3fc; border: 1px solid rgba(56, 189, 248, 0.3); }
+.re { background: rgba(110, 118, 129, 0.2); color: #c9d1d9; border: 1px solid rgba(110, 118, 129, 0.3); }
 
 .db {
   display: inline-block;
@@ -1026,9 +1099,9 @@ body::before {
   border-radius: 999px;
 }
 
-.dv { background: var(--red-soft); color: #fb7185; border: 1px solid var(--red-border); }
-.dp { background: var(--yellow-soft); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
-.dr { background: var(--accent-soft); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.25); }
+.dv { background: var(--red-soft); color: var(--red-bright); border: 1px solid var(--red-border); }
+.dp { background: var(--yellow-soft); color: #e3b341; border: 1px solid rgba(210, 153, 34, 0.4); }
+.dr { background: rgba(56, 189, 248, 0.15); color: #7dd3fc; border: 1px solid rgba(56, 189, 248, 0.3); }
 
 /* Modals */
 .mbg {
@@ -1040,8 +1113,8 @@ body::before {
   align-items: center;
   justify-content: center;
   padding: 16px;
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .mbg.open {
@@ -1049,18 +1122,18 @@ body::before {
 }
 
 .mod {
-  background: var(--card);
+  background: linear-gradient(180deg, rgba(22, 30, 46, 0.95) 0%, rgba(14, 19, 31, 0.98) 100%);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 24px;
   width: 100%;
   max-width: 440px;
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .mod h3 {
-  margin-bottom: 14px;
-  font-size: 1.1rem;
+  margin-bottom: 16px;
+  font-size: 1.15rem;
   font-weight: 600;
   color: #fff;
 }
@@ -1069,7 +1142,7 @@ body::before {
   display: flex;
   gap: 8px;
   justify-content: flex-end;
-  margin-top: 18px;
+  margin-top: 20px;
 }
 
 pre.rp {
@@ -1080,7 +1153,7 @@ pre.rp {
   background: var(--card-inner);
   padding: 16px;
   border-radius: var(--radius-sm);
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--border);
   min-height: 80px;
   color: #cbd5e1;
 }
@@ -1093,7 +1166,7 @@ pre.rp {
 
 .empty {
   text-align: center;
-  padding: 40px 20px;
+  padding: 44px 20px;
   color: var(--text-secondary);
   font-size: 0.92rem;
 }
@@ -1119,7 +1192,7 @@ pre.rp {
   justify-content: space-between;
   gap: 12px;
   padding: 11px 0;
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .fx-row:last-child {
@@ -1160,23 +1233,23 @@ pre.rp {
 }
 
 .fx-toggle.on {
-  background: rgba(59, 130, 246, 0.25);
-  border-color: var(--accent);
+  background: rgba(37, 99, 235, 0.3);
+  border-color: #3b82f6;
 }
 
 .fx-toggle.on i {
   transform: translateX(18px);
-  background: var(--accent);
+  background: #38bdf8;
 }
 
 .fx-range {
   width: 130px;
-  accent-color: var(--accent);
+  accent-color: #38bdf8;
 }
 
 @keyframes fxPress { 0% { transform: scale(1); } 45% { transform: scale(1.06); } 100% { transform: scale(1); } }
 @keyframes fxBounce { 0% { transform: translateY(0) scale(1); } 45% { transform: translateY(-2px) scale(1.03); } 100% { transform: translateY(0) scale(1); } }
-@keyframes fxGlow { 0% { box-shadow: 0 0 0 rgba(59, 130, 246, 0); } 45% { box-shadow: 0 0 10px rgba(59, 130, 246, 0.4); } 100% { box-shadow: 0 0 0 rgba(59, 130, 246, 0); } }
+@keyframes fxGlow { 0% { box-shadow: 0 0 0 rgba(56, 189, 248, 0); } 45% { box-shadow: 0 0 12px rgba(56, 189, 248, 0.5); } 100% { box-shadow: 0 0 0 rgba(56, 189, 248, 0); } }
 @keyframes fxLift { 0% { transform: translateY(0); } 45% { transform: translateY(-3px); } 100% { transform: translateY(0); } }
 
 .fx-pulse { animation: fxPress 0.16s ease; }
@@ -1191,15 +1264,13 @@ pre.rp {
   .card-actions { align-items: flex-start; }
 }
 </style>
-<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-database-compat.js"></script>
 </head>
 <body><canvas id="fxCanvas" aria-hidden="true"></canvas>
 
 <!-- Login Screen -->
 <div class="auth" id="login" style="display:flex">
   <div class="box">
-    <h1 style="margin-bottom:20px">Вход</h1>
+    <h1>Вход</h1>
     <div class="err" id="lErr"></div>
     <div class="f">
       <label>Логин</label>
@@ -1212,41 +1283,86 @@ pre.rp {
     <button class="btn btn-p" id="lBtn" style="width:100%;margin-top:10px" onclick="login()">Войти</button>
   </div>
 </div>
-</div>
 
 <!-- Main App -->
 <div id="app">
   <header class="top">
-    <h1>АБ <span>· проверки личного состава</span></h1>
+    <h1>
+      АБ
+      <span>· проверки личного состава</span>
+    </h1>
     <div class="tr">
-      <span class="sec-badge" title="Все данные зашифрованы алгоритмом AES-256">🔒 Зашифровано</span>
+      <span class="sec-badge" title="Защищено стандартом AES-256">
+        <svg class="svg-ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+        AES-256
+      </span>
       <span id="st"><span class="dot on"></span>В сети</span>
       <button class="av" id="avB" onclick="togMenu()">?</button>
       <div class="drop" id="avM">
-        <button onclick="go('account');clsMenu()">⚙️ Настройки</button>
-        <button onclick="document.getElementById('avF').click();clsMenu()">🖼️ Аватар</button>
+        <button onclick="go('account');clsMenu()">
+          <svg class="svg-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          Настройки
+        </button>
+        <button onclick="document.getElementById('avF').click();clsMenu()">
+          <svg class="svg-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+          Аватар
+        </button>
         <input type="file" id="avF" accept="image/*" style="display:none" onchange="setAv(event)">
-        <button onclick="logout()" style="color:#fca5a5">🚪 Выйти</button>
+        <button onclick="logout()" style="color:#f85149">
+          <svg class="svg-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          Выйти
+        </button>
       </div>
-      <button class="btn btn-g btn-sm" onclick="logout()" style="color:var(--text-secondary);padding:6px 12px;font-size:0.82rem;gap:6px" title="Выйти из аккаунта">🚪 Выйти</button>
-      <button class="bur" onclick="togSide()">☰</button>
+      <button class="btn btn-g btn-sm logout-btn" onclick="logout()" title="Выйти из аккаунта">
+        <svg class="svg-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        Выйти
+      </button>
+      <button class="bur" onclick="togSide()">
+        <svg class="svg-ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+      </button>
     </div>
   </header>
 
   <div class="ov" id="ov" onclick="togSide()"></div>
 
   <aside class="side" id="side">
-    <div class="sh"><strong>Меню</strong><button class="btn btn-g btn-sm" onclick="togSide()">✕</button></div>
+    <div class="sh">
+      <strong>Навигация</strong>
+      <button class="btn btn-g btn-sm" onclick="togSide()">
+        <svg class="svg-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
     <nav class="sn">
-      <button class="nb a" data-s="checks" onclick="go('checks')">📋 Проверки</button>
-      <button class="nb" data-s="disciplinary" id="nD" onclick="go('disciplinary')">⚠️ Дисциплинарные</button>
-      <button class="nb" data-s="report" id="nR" onclick="go('report')">📄 Итоговый отчёт</button>
-      <button class="nb" data-s="cleanup" id="nC" onclick="go('cleanup')">🧹 Очистка таблицы</button>
-      <button class="nb" data-s="admin" id="nA" style="display:none" onclick="go('admin')">⚙️ Администрирование</button>
-      <button class="nb" data-s="account" onclick="go('account')">👤 Аккаунт и Безопасность</button>
+      <button class="nb a" data-s="checks" onclick="go('checks')">
+        <svg class="svg-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect><path d="M9 14l2 2 4-4"></path></svg>
+        Проверки
+      </button>
+      <button class="nb" data-s="disciplinary" id="nD" onclick="go('disciplinary')">
+        <svg class="svg-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+        Дисциплинарные
+      </button>
+      <button class="nb" data-s="report" id="nR" onclick="go('report')">
+        <svg class="svg-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+        Итоговый отчёт
+      </button>
+      <button class="nb" data-s="cleanup" id="nC" onclick="go('cleanup')">
+        <svg class="svg-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+        Очистка таблицы
+      </button>
+      <button class="nb" data-s="admin" id="nA" style="display:none" onclick="go('admin')">
+        <svg class="svg-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        Администрирование
+      </button>
+      <button class="nb" data-s="account" onclick="go('account')">
+        <svg class="svg-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        Аккаунт и Безопасность
+      </button>
     </nav>
     <div style="padding:12px;margin-top:auto;border-top:1px solid var(--border)">
-      <button class="nb" onclick="logout()" style="color:#fb7185;background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.25);width:100%;justify-content:center">🚪 Выйти из аккаунта</button>
+      <button class="nb" onclick="logout()" style="color:#f85149;background:rgba(218,54,51,0.1);border:1px solid rgba(218,54,51,0.25);width:100%;justify-content:center">
+        <svg class="svg-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        Выйти из аккаунта
+      </button>
     </div>
   </aside>
 
@@ -1255,20 +1371,27 @@ pre.rp {
     <section class="sec a" id="s-checks">
       <div class="tit">Проверки личного состава</div>
 
+      <!-- Search Bar -->
       <div class="sr">
+        <svg class="svg-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
         <input id="sIn" placeholder="Быстрый поиск по имени, фамилии или номеру паспорта..." oninput="search()">
         <button class="btn btn-g btn-sm" onclick="clrS()">Сброс</button>
         <div class="sres" id="sR"></div>
       </div>
 
-      <!-- Add Employee Bar -->
+      <!-- Add Employee Dock -->
       <div class="add-bar" id="addB">
-        <div class="add-col"><label>Имя</label><input id="aN" placeholder="Иван" style="width:100px"></div>
-        <div class="add-col"><label>Фамилия</label><input id="aS" placeholder="Иванов" style="width:110px"></div>
-        <div class="add-col"><label>Паспорт</label><input id="aP" maxlength="7" placeholder="123-456" style="width:85px"></div>
-        <div class="add-col"><label>Отдел</label><select id="aD" onchange="fillG()"></select></div>
-        <div class="add-col" id="aGCol"><label id="aGL">Категория</label><select id="aG" style="min-width:130px"></select></div>
-        <button class="btn btn-p btn-sm" onclick="addE()">＋ Добавить</button>
+        <div class="add-inputs">
+          <div class="add-col"><label>Имя</label><input id="aN" placeholder="Иван"></div>
+          <div class="add-col"><label>Фамилия</label><input id="aS" placeholder="Иванов"></div>
+          <div class="add-col"><label>Паспорт</label><input id="aP" maxlength="7" placeholder="123-456"></div>
+          <div class="add-col"><label>Отдел</label><select id="aD" onchange="fillG()"></select></div>
+          <div class="add-col" id="aGCol"><label id="aGL">Категория</label><select id="aG"></select></div>
+        </div>
+        <button class="btn btn-p" onclick="addE()" style="white-space:nowrap;height:40px">
+          <svg class="svg-ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          Добавить
+        </button>
       </div>
 
       <!-- Department Tabs -->
@@ -1277,29 +1400,39 @@ pre.rp {
       <!-- Category Management Bar -->
       <div class="cat-bar" id="catBar" style="display:none">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-          <span style="font-size:.82rem;color:var(--text-secondary);font-weight:600">📁 Категории:</span>
+          <span style="font-size:.82rem;color:var(--text-secondary);font-weight:600;display:inline-flex;align-items:center;gap:6px">
+            <svg class="svg-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+            Категории:
+          </span>
           <div class="cat-chips" id="catChips"></div>
         </div>
-        <button class="btn btn-g btn-sm" id="btnNewCat" onclick="createCat()">＋ Создать категорию</button>
+        <button class="btn btn-g btn-sm" id="btnNewCat" onclick="createCat()">
+          <svg class="svg-ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          Создать категорию
+        </button>
       </div>
 
-      <div class="only-wrap">
-        <label><input type="checkbox" id="oU" onchange="syncOnly(this.checked)"> Показывать только непроверенных сотрудников</label>
+      <!-- Single Filter Switch (Duplicate removed!) -->
+      <div class="filter-dock">
+        <label class="toggle-pill" for="oU">
+          <input type="checkbox" id="oU" onchange="syncOnly(this.checked)">
+          <span class="toggle-switch"></span>
+          <span class="toggle-label">Показывать только непроверенных сотрудников</span>
+        </label>
       </div>
 
       <!-- Employees List -->
       <div id="list"></div>
-
-      <div class="only-wrap" style="margin-top:16px">
-        <label><input type="checkbox" id="oU2" onchange="syncOnly(this.checked)"> Показывать только непроверенных сотрудников</label>
-      </div>
     </section>
 
     <!-- SECTION: DISCIPLINARY -->
     <section class="sec" id="s-disciplinary">
       <div class="tit">Дисциплинарные взыскания</div>
       <div class="fc" id="dF">
-        <h3>Выдать взыскание</h3>
+        <h3>
+          <svg class="svg-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          Выдать взыскание
+        </h3>
         <div class="fr">
           <div class="x"><label>Имя</label><input id="dN"></div>
           <div class="x"><label>Фамилия</label><input id="dS"></div>
@@ -1315,7 +1448,10 @@ pre.rp {
         <div class="hint" id="dM"></div>
       </div>
 
-      <div class="sr"><input id="dSe" placeholder="Поиск взысканий..." oninput="renD()"></div>
+      <div class="sr">
+        <svg class="svg-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input id="dSe" placeholder="Поиск взысканий..." oninput="renD()">
+      </div>
       <div class="tabs"><button class="tab a" id="dtA" onclick="setDT('active')">Активные</button><button class="tab" id="dtR" onclick="setDT('archive')">Архив</button></div>
       <div id="dL"></div>
     </section>
@@ -1324,7 +1460,7 @@ pre.rp {
     <section class="sec" id="s-cleanup">
       <div class="tit">Очистка таблицы</div>
       <div class="fc">
-        <p class="hint" style="margin-bottom:12px">Сбрасывает только отметки проверок (✓ и ✗). Сами сотрудники и категории сохраняются.</p>
+        <p class="hint" style="margin-bottom:14px">Сбрасывает только отметки проверок. Сами сотрудники и категории сохраняются.</p>
         <div class="fr">
           <div class="x"><label>Отдел</label><select id="clDep" onchange="fillCleanup()"></select></div>
           <div class="x"><label>Что очистить</label><select id="clCat"></select></div>
@@ -1355,7 +1491,10 @@ pre.rp {
     <section class="sec" id="s-admin">
       <div class="tit">Администрирование</div>
       <div class="fc">
-        <h3>Создать пользователя</h3>
+        <h3>
+          <svg class="svg-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          Создать пользователя
+        </h3>
         <div class="fr">
           <div class="x"><label>Имя</label><input id="uN"></div>
           <div class="x"><label>Фамилия</label><input id="uS"></div>
@@ -1369,7 +1508,10 @@ pre.rp {
         <button class="btn btn-p" style="width:auto" onclick="cUser()">Создать</button>
         <div class="hint" id="uM"></div>
       </div>
-      <div class="fc"><h3>Пользователи системы</h3><div id="uLi"></div></div>
+      <div class="fc">
+        <h3>Пользователи системы</h3>
+        <div id="uLi"></div>
+      </div>
     </section>
 
     <!-- SECTION: ACCOUNT & SECURITY -->
@@ -1377,13 +1519,22 @@ pre.rp {
       <div class="tit">Аккаунт и Безопасность</div>
 
       <div class="fc">
-        <h3>🛡️ Криптографическая защита данных</h3>
+        <h3>
+          <svg class="svg-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          Криптографическая защита данных
+        </h3>
         <div style="font-size:0.86rem;color:var(--text-secondary);line-height:1.6;margin-bottom:14px">
-          Все ваши данные (личный состав, паспорта, категории, дисциплинарные записи) хранятся в зашифрованном виде с использованием стандарта <strong>AES-GCM (256 бит)</strong>. Ключ шифрования формируется с помощью <strong>PBKDF2 (100&nbsp;000 итераций SHA-256)</strong> на основе вашего пароля.
+          Пароли защищены криптографическим хэшированием <strong>PBKDF2 (100&nbsp;000 итераций SHA-256)</strong> с индивидуальной солью. Данные синхронизируются через облачную базу <strong>Google Firebase Realtime Database</strong>.
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <button class="btn btn-g btn-sm" onclick="exportBackup()">📥 Экспорт резервной копии (.json)</button>
-          <button class="btn btn-g btn-sm" onclick="document.getElementById('importFile').click()">📤 Импорт резервной копии</button>
+          <button class="btn btn-g btn-sm" onclick="exportBackup()">
+            <svg class="svg-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Экспорт резервной копии (.json)
+          </button>
+          <button class="btn btn-g btn-sm" onclick="document.getElementById('importFile').click()">
+            <svg class="svg-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+            Импорт резервной копии
+          </button>
           <input type="file" id="importFile" accept=".json" style="display:none" onchange="importBackup(event)">
         </div>
         <div class="hint" id="bkM"></div>
@@ -1401,13 +1552,22 @@ pre.rp {
       </div>
 
       <div class="fc">
-        <h3>Смена пароля и перешифрование базы</h3>
+        <h3>Смена пароля</h3>
         <div class="fr">
           <div class="x"><label>Новый пароль</label><input type="password" id="np1"></div>
           <div class="x"><label>Повтор нового пароля</label><input type="password" id="np2"></div>
         </div>
         <button class="btn btn-p" style="width:auto" onclick="chP()">Сменить пароль</button>
         <div class="hint" id="pM"></div>
+      </div>
+
+      <div class="fc" style="border-color:rgba(248,81,73,0.3)">
+        <h3 style="color:#f85149">
+          <svg class="svg-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          Завершение сессии
+        </h3>
+        <p class="hint" style="margin-bottom:14px">Выход из учетной записи на этом устройстве.</p>
+        <button class="btn btn-d" onclick="logout()">Выйти из аккаунта</button>
       </div>
 
       <div class="fc">
@@ -1420,13 +1580,7 @@ pre.rp {
           <div class="fx-row"><div class="fx-label">Стиль анимации</div><select id="fxAnimStyle" onchange="fxSetStyle(this.value)" style="min-width:150px"><option value="pulse">Мягкое увеличение</option><option value="bounce">Лёгкий bounce</option><option value="glow">Подсветка</option><option value="lift">Подъём</option></select></div>
         </div>
       </div>
-    
-      <div class="fc" style="border-color:rgba(244,63,94,0.3)">
-        <h3 style="color:#fb7185">🚪 Завершение сессии</h3>
-        <p class="hint" style="margin-bottom:14px">Выход из учетной записи на этом устройстве.</p>
-        <button class="btn btn-d" onclick="logout()">Выйти из аккаунта</button>
-      </div>
-</section>
+    </section>
   </main>
 </div>
 
@@ -1442,7 +1596,7 @@ pre.rp {
     </div>
     <div class="fr" id="eGR"><div class="x"><label>Категория</label><select id="eG"></select></div></div>
     <div class="ma">
-      <button class="btn btn-d" onclick="resetFromEdit()">Сбросить ✓/✗</button>
+      <button class="btn btn-d" onclick="resetFromEdit()">Сбросить проверки</button>
       <button class="btn btn-g" onclick="clsEd()">Отмена</button>
       <button class="btn btn-p" style="width:auto" onclick="svEd()">Сохранить</button>
     </div>
@@ -1478,7 +1632,23 @@ const DT = {
 };
 
 let data = {}, users = {}, me = null, tab = 'ruk', dTab = 'active', disc = {}, categories = {}, saveT, searchT;
-let masterKey = null; // AES-GCM CryptoKey в оперативной памяти (никогда не пишется в открытом виде на диск)
+
+/* ==========================================================================
+   ВЕКТОРНЫЕ ИКОНКИ (SVG Icons)
+   ========================================================================== */
+const ICONS = {
+  check: '<svg class="svg-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>',
+  cross: '<svg class="svg-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>',
+  dash: '<svg class="svg-ic" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>',
+  edit: '<svg class="svg-ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>',
+  trash: '<svg class="svg-ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>',
+  up: '<svg class="svg-ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>',
+  down: '<svg class="svg-ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>',
+  plus: '<svg class="svg-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>',
+  close: '<svg class="svg-ic" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>',
+  folder: '<svg class="svg-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>',
+  logout: '<svg class="svg-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>'
+};
 
 /* ==========================================================================
    ПОДКЛЮЧЕНИЕ ОБЛАЧНОЙ БАЗЫ ДАННЫХ (Google Firebase Realtime Database)
@@ -1522,7 +1692,7 @@ if (!db) {
           }
           return Promise.resolve();
         },
-        update(updates) { return Promise.resolve(); },
+        update() { return Promise.resolve(); },
         remove() { return Promise.resolve(); },
         on(ev, cb) { this.once().then(s => cb(s)); return this; }
       };
@@ -1531,7 +1701,7 @@ if (!db) {
 }
 
 /* ==========================================================================
-   КРИПТОГРАФИЧЕСКИЙ ДВИЖОК (Web Crypto API: PBKDF2 + AES-GCM 256-bit)
+   КРИПТОГРАФИЧЕСКИЙ ДВИЖОК (PBKDF2 SHA-256)
    ========================================================================== */
 const CryptoEngine = {
   textEncoder: new TextEncoder(),
@@ -1559,24 +1729,6 @@ const CryptoEngine = {
     return crypto.getRandomValues(new Uint8Array(16));
   },
 
-  async getAppKey() {
-    let rawB64 = localStorage.getItem('cgb_app_vault_key');
-    let rawKey;
-    if (!rawB64) {
-      rawKey = crypto.getRandomValues(new Uint8Array(32));
-      localStorage.setItem('cgb_app_vault_key', this.buf2b64(rawKey));
-    } else {
-      rawKey = new Uint8Array(this.b642buf(rawB64));
-    }
-    return await crypto.subtle.importKey(
-      'raw',
-      rawKey,
-      { name: 'AES-GCM', length: 256 },
-      false,
-      ['encrypt', 'decrypt']
-    );
-  },
-
   async hashPassword(password, saltBytes) {
     const keyMaterial = await crypto.subtle.importKey(
       'raw',
@@ -1596,77 +1748,6 @@ const CryptoEngine = {
       256
     );
     return this.buf2b64(bits);
-  },
-
-  async encrypt(dataObj) {
-    const key = await this.getAppKey();
-    const iv = crypto.getRandomValues(new Uint8Array(12));
-    const plaintext = JSON.stringify(dataObj);
-    const cipherBuffer = await crypto.subtle.encrypt(
-      { name: 'AES-GCM', iv: iv },
-      key,
-      this.textEncoder.encode(plaintext)
-    );
-    return {
-      iv: this.buf2b64(iv),
-      data: this.buf2b64(cipherBuffer)
-    };
-  },
-
-  async decrypt(encryptedObj) {
-    if (!encryptedObj || !encryptedObj.iv || !encryptedObj.data) return null;
-    const key = await this.getAppKey();
-    const iv = new Uint8Array(this.b642buf(encryptedObj.iv));
-    const cipherBuffer = this.b642buf(encryptedObj.data);
-    const decryptedBuffer = await crypto.subtle.decrypt(
-      { name: 'AES-GCM', iv: iv },
-      key,
-      cipherBuffer
-    );
-    return JSON.parse(this.textDecoder.decode(decryptedBuffer));
-  }
-};
-
-/* ==========================================================================
-   ЗАЩИЩЕННАЯ БАЗА ДАННЫХ (AES-256 Encrypted LocalStorage)
-   ========================================================================== */
-const EncryptedDB = {
-  async saveAll() {
-    try {
-      const payload = {
-        data: data,
-        categories: categories,
-        disc: disc,
-        users: users,
-        version: 3,
-        updatedAt: Date.now()
-      };
-      const encrypted = await CryptoEngine.encrypt(payload);
-      localStorage.setItem('cgb_secure_vault', JSON.stringify(encrypted));
-      st(true, 'Защищено');
-    } catch(e) {
-      console.error('Ошибка сохранения:', e);
-      st(false, 'Ошибка сохранения');
-    }
-  },
-
-  async loadAll() {
-    const raw = localStorage.getItem('cgb_secure_vault');
-    if (!raw) return false;
-    try {
-      const encObj = JSON.parse(raw);
-      const decrypted = await CryptoEngine.decrypt(encObj);
-      if (decrypted) {
-        data = decrypted.data || {};
-        categories = decrypted.categories || {};
-        disc = decrypted.disc || {};
-        users = decrypted.users || {};
-        return true;
-      }
-    } catch(e) {
-      console.error('Ошибка дешифрования хранилища:', e);
-    }
-    return false;
   }
 };
 
@@ -1701,17 +1782,14 @@ function st(ok, t) {
   if (el) el.innerHTML = '<span class="dot ' + (ok ? 'on' : 'off') + '"></span>' + esc(t);
 }
 
-/* Защита от подбора пароля (Brute-force lockout) */
 let failedAttempts = 0;
 let lockoutTimer = null;
-
 function checkLockout() {
   if (failedAttempts >= 5) {
-    const remaining = 30;
     err('lErr', 'Слишком много неверных попыток. Подождите 30 секунд...');
     const btn = document.getElementById('lBtn');
     btn.disabled = true;
-    let sec = remaining;
+    let sec = 30;
     if (lockoutTimer) clearInterval(lockoutTimer);
     lockoutTimer = setInterval(() => {
       sec--;
@@ -1722,7 +1800,7 @@ function checkLockout() {
         btn.disabled = false;
         btn.textContent = 'Войти';
       } else {
-        err('lErr', 'Блокировка безопасности: подождите ' + sec + ' сек.');
+        err('lErr', 'Блокировка: подождите ' + sec + ' сек.');
       }
     }, 1000);
     return true;
@@ -1730,7 +1808,6 @@ function checkLockout() {
   return false;
 }
 
-/* Автоматическая блокировка при неактивности (30 минут) */
 let idleTimer = null;
 function resetIdleTimer() {
   clearTimeout(idleTimer);
@@ -1746,7 +1823,7 @@ window.addEventListener('keydown', resetIdleTimer, { passive: true });
 window.addEventListener('click', resetIdleTimer, { passive: true });
 
 /* ==========================================================================
-   АВТОРИЗАЦИЯ И ШИФРОВАНИЕ
+   АВТОРИЗАЦИЯ
    ========================================================================== */
 async function bootAd() {
   const adminSalt = CryptoEngine.getNewSalt();
@@ -1785,17 +1862,14 @@ async function login() {
   btn.textContent = 'Вход...';
 
   try {
-    // Убеждаемся что база загружена из хранилища
-    if (!Object.keys(users).length) {
-      await EncryptedDB.loadAll();
-      if (!Object.keys(users).length) {
-        await bootAd();
-        ensureCats();
-        await EncryptedDB.saveAll();
-      }
+    let snap;
+    try {
+      snap = await db.ref('cgb_users').once('value');
+    } catch(e) {
+      console.warn('Fetch error:', e);
     }
+    users = (snap && snap.val()) || users || {};
 
-    // Ищем пользователя по логину (без учета регистра)
     let found = null, fid = null;
     for (const [id, u] of Object.entries(users)) {
       if ((u.login || '').trim().toLowerCase() === loginInput) {
@@ -1805,12 +1879,11 @@ async function login() {
       }
     }
 
-    // Если это первый запуск и стандартный логин администратора
     if (!found && loginInput === 'maksim-milonov-877-506' && pass === 'makschinik11') {
       await bootAd();
       found = users.u_admin_main;
       fid = 'u_admin_main';
-      await EncryptedDB.saveAll();
+      await db.ref('cgb_users/' + fid).set(found);
     }
 
     if (!found) {
@@ -1822,7 +1895,6 @@ async function login() {
       return;
     }
 
-    // Получаем соль пользователя и проверяем пароль
     let saltBytes;
     if (found.salt) {
       saltBytes = new Uint8Array(CryptoEngine.b642buf(found.salt));
@@ -1830,7 +1902,7 @@ async function login() {
       saltBytes = CryptoEngine.getNewSalt();
       found.salt = CryptoEngine.buf2b64(saltBytes);
       found.passwordHash = await CryptoEngine.hashPassword(pass, saltBytes);
-      await EncryptedDB.saveAll();
+      await db.ref('cgb_users/' + fid).set(found);
     }
 
     const testHash = await CryptoEngine.hashPassword(pass, saltBytes);
@@ -1874,7 +1946,7 @@ async function login() {
 
 function logout() {
   me = null;
-  masterKey = null; // Очищаем ключ из памяти
+  sessionStorage.removeItem('cgb_session');
   clsMenu();
   document.getElementById('pIn').value = '';
   document.getElementById('app').style.display = 'none';
@@ -1894,6 +1966,7 @@ function saveSes() {
     avatar: me.avatar || ''
   }));
 }
+
 function loadSes() {
   try { return JSON.parse(sessionStorage.getItem('cgb_session')); } catch(e) { return null; }
 }
@@ -1925,7 +1998,7 @@ function openApp() {
   ensure();
   load();
 
-  // Живая синхронизация со всеми устройствами
+  // Синхронизация в реальном времени с базой данных
   db.ref('cgb_categories').on('value', s => {
     categories = s.val() || {};
     ensureCats();
@@ -1949,7 +2022,7 @@ function openApp() {
   render();
   renD();
   if (isAd()) renU();
-  st(true, 'Онлайн: ' + (me.name || me.login));
+  st(true, (me.name || me.login));
   resetIdleTimer();
 }
 
@@ -2028,10 +2101,10 @@ function renderCats() {
     const cnt = (data[tab] || []).filter(e => e.categoryId === c.id).length;
     let btns = '';
     if (isSS()) {
-      btns = '<button class="chip-btn" title="Переименовать" onclick="renameCat(\'' + c.id + '\')">✏️</button>' +
-             '<button class="chip-btn" title="Удалить" onclick="deleteCat(\'' + c.id + '\')">✕</button>';
+      btns = `<button class="chip-btn" title="Переименовать" onclick="renameCat('${c.id}')">${ICONS.edit}</button>` +
+             `<button class="chip-btn" title="Удалить" onclick="deleteCat('${c.id}')">${ICONS.close}</button>`;
     }
-    return '<span class="cat-chip">' + esc(c.name) + ' (' + cnt + ') ' + btns + '</span>';
+    return '<span class="cat-chip">' + ICONS.folder + ' ' + esc(c.name) + ' (' + cnt + ') ' + btns + '</span>';
   }).join('');
 }
 
@@ -2128,6 +2201,14 @@ function sched() {
   }, 350);
 }
 
+function load() {
+  db.ref('cgb_proverki').on('value', s => {
+    data = s.val() || {};
+    ensure();
+    render();
+  });
+}
+
 function isCh(e) {
   return CHK.some(c => e.checks[c.id] === 'ok' || e.checks[c.id] === 'bad');
 }
@@ -2174,7 +2255,7 @@ function sync(dep, emp) {
    ========================================================================== */
 function renTabs() {
   document.getElementById('tabs').innerHTML = DEPS.map(d =>
-    '<button class="tab ' + (tab === d.id ? 'a' : '') + '" onclick="setTab(\'' + d.id + '\')">' + esc(d.name) + '</button>'
+    `<button class="tab ${tab === d.id ? 'a' : ''}" onclick="setTab('${d.id}')">${esc(d.name)}</button>`
   ).join('');
 }
 
@@ -2188,7 +2269,6 @@ function setTab(id) {
 
 function syncOnly(v) {
   document.getElementById('oU').checked = v;
-  document.getElementById('oU2').checked = v;
   render();
 }
 
@@ -2222,13 +2302,14 @@ function render() {
       let catActions = '';
       if (isSS() && b.c.id !== '__none') {
         catActions = '<div class="cat-actions">' +
-          '<button class="btn btn-g btn-sm" style="padding:2px 8px;font-size:.75rem" onclick="renameCat(\'' + b.c.id + '\')">✏️ Изменить</button>' +
-          '<button class="btn btn-d btn-sm" style="padding:2px 8px;font-size:.75rem" onclick="deleteCat(\'' + b.c.id + '\')">✕ Удалить</button>' +
+          `<button class="btn btn-g btn-sm" style="padding:4px 9px;font-size:.78rem;gap:4px" onclick="renameCat('${b.c.id}')">${ICONS.edit} Изменить</button>` +
+          `<button class="btn btn-d btn-sm" style="padding:4px 9px;font-size:.78rem;gap:4px" onclick="deleteCat('${b.c.id}')">${ICONS.close} Удалить</button>` +
         '</div>';
       }
       h += '<div class="cat-group">' +
              '<div class="cat-header ' + hueClass + '">' +
                '<div class="cat-title">' +
+                 ICONS.folder +
                  '<span>' + esc(b.c.name) + '</span>' +
                  '<span class="cat-count">' + b.arr.length + ' чел.</span>' +
                '</div>' +
@@ -2253,7 +2334,7 @@ function card(dep, e, idx, tot) {
   const ch = CHK.map(c => {
     const st = e.checks[c.id] || '';
     const cl = st === 'ok' ? 'ok' : (st === 'bad' ? 'bad' : '');
-    const ic = st === 'ok' ? '✓' : (st === 'bad' ? '✗' : '–');
+    const ic = st === 'ok' ? ICONS.check : (st === 'bad' ? ICONS.cross : ICONS.dash);
     const title = st === 'ok' ? 'Пройдено' : (st === 'bad' ? 'Не пройдено' : 'Не проверено');
 
     if (loc) {
@@ -2264,23 +2345,23 @@ function card(dep, e, idx, tot) {
     }
     return '<div class="ck">' +
              '<span class="ck-label">' + esc(c.label) + '</span>' +
-             '<button class="sb ' + cl + '" title="' + title + '" onclick="tog(\'' + dep + '\',\'' + e.id + '\',\'' + c.id + '\')">' + ic + '</button>' +
+             `<button class="sb ${cl}" title="${title}" onclick="tog('${dep}','${e.id}','${c.id}')">${ic}</button>` +
            '</div>';
   }).join('');
 
   let actsTop = '', actsBot = '';
   if (!loc) {
     actsTop = '<div class="acts-row">' +
-      '<button class="btn btn-s btn-sm" onclick="setAll(\'' + dep + '\',\'' + e.id + '\',\'ok\')">Все ✓</button>' +
-      '<button class="btn btn-d btn-sm" onclick="setAll(\'' + dep + '\',\'' + e.id + '\',\'bad\')">Все ✗</button>' +
+      `<button class="btn btn-s btn-sm" onclick="setAll('${dep}','${e.id}','ok')">${ICONS.check} Все пройдены</button>` +
+      `<button class="btn btn-d btn-sm" onclick="setAll('${dep}','${e.id}','bad')">${ICONS.cross} Все не пройдены</button>` +
     '</div>';
   }
   if (isSS()) {
     actsBot = '<div class="acts-row">' +
-      '<button class="btn btn-g btn-sm" title="Редактировать" onclick="opEd(\'' + dep + '\',\'' + e.id + '\')">✏️</button>' +
-      '<button class="btn btn-g btn-sm" title="Переместить вверх" onclick="mov(\'' + dep + '\',\'' + e.id + '\',-1)"' + (idx === 0 ? ' disabled' : '') + '>↑</button>' +
-      '<button class="btn btn-g btn-sm" title="Переместить вниз" onclick="mov(\'' + dep + '\',\'' + e.id + '\',1)"' + (idx >= tot - 1 ? ' disabled' : '') + '>↓</button>' +
-      '<button class="btn btn-d btn-sm" title="Удалить" onclick="delE(\'' + dep + '\',\'' + e.id + '\')">🗑</button>' +
+      `<button class="btn btn-g btn-sm btn-icon" title="Редактировать" onclick="opEd('${dep}','${e.id}')">${ICONS.edit}</button>` +
+      `<button class="btn btn-g btn-sm btn-icon" title="Переместить вверх" onclick="mov('${dep}','${e.id}',-1)"${idx === 0 ? ' disabled' : ''}>${ICONS.up}</button>` +
+      `<button class="btn btn-g btn-sm btn-icon" title="Переместить вниз" onclick="mov('${dep}','${e.id}',1)"${idx >= tot - 1 ? ' disabled' : ''}>${ICONS.down}</button>` +
+      `<button class="btn btn-d btn-sm btn-icon" title="Удалить" onclick="delE('${dep}','${e.id}')">${ICONS.trash}</button>` +
     '</div>';
   }
 
@@ -2550,11 +2631,11 @@ async function clearChecks() {
   });
 
   syncCleanupMirror(dep, targets);
-  await EncryptedDB.saveAll();
+  await db.ref('cgb_proverki').set(data);
   render();
   fillCleanup();
-  document.getElementById('clM').textContent = 'Проверки успешно сброшены (' + targets.length + ' чел.)';
-  document.getElementById('clM').style.color = 'var(--green)';
+  document.getElementById('clM').textContent = 'Проверки сброшены (' + targets.length + ' чел.)';
+  document.getElementById('clM').style.color = 'var(--green-bright)';
 }
 
 function syncCleanupMirror(dep, targets) {
@@ -2606,7 +2687,7 @@ function search() {
     }
 
     box.innerHTML = res.slice(0, 15).map(r =>
-      '<div class="si" onclick="jump(\'' + r.d.id + '\',\'' + r.e.id + '\')">' +
+      `<div class="si" onclick="jump('${r.d.id}','${r.e.id}')">` +
         '<strong>' + esc(r.e.name) + ' ' + esc(r.e.surname) + '</strong> · ' + esc(r.e.passport) +
         ' <span class="hint">(' + esc(r.d.name) + ')</span>' +
       '</div>'
@@ -2622,7 +2703,6 @@ function clrS() {
 
 function jump(dep, id) {
   document.getElementById('oU').checked = false;
-  document.getElementById('oU2').checked = false;
   setTab(dep);
   setTimeout(() => {
     const el = document.getElementById('c-' + id);
@@ -2658,17 +2738,17 @@ async function addD() {
 
   if (!name || !sur || !pass || pass.length < 7) {
     msg.textContent = 'Заполните ФИО и корректный номер паспорта';
-    msg.style.color = 'var(--red)';
+    msg.style.color = 'var(--red-bright)';
     return;
   }
   if (!fr || !to) {
     msg.textContent = 'Укажите период действия';
-    msg.style.color = 'var(--red)';
+    msg.style.color = 'var(--red-bright)';
     return;
   }
   if (to < fr) {
     msg.textContent = 'Дата окончания не может быть раньше начала';
-    msg.style.color = 'var(--red)';
+    msg.style.color = 'var(--red-bright)';
     return;
   }
 
@@ -2689,14 +2769,14 @@ async function addD() {
 
   try {
     disc[id] = item;
-    await EncryptedDB.saveAll();
+    await db.ref('cgb_disciplinary/' + id).set(item);
     ['dN', 'dS', 'dP', 'dNo', 'dFr', 'dTo'].forEach(i => document.getElementById(i).value = '');
-    msg.textContent = 'Взыскание успешно сохранено';
-    msg.style.color = 'var(--green)';
+    msg.textContent = 'Взыскание сохранено';
+    msg.style.color = 'var(--green-bright)';
     setDT('active');
   } catch(e) {
     msg.textContent = e.message;
-    msg.style.color = 'var(--red)';
+    msg.style.color = 'var(--red-bright)';
   }
 }
 
@@ -2731,11 +2811,11 @@ function renD() {
     let act = '';
     if (isSS()) {
       if ((x.status || 'active') === 'active') {
-        act = '<button class="btn btn-g btn-sm" onclick="archD(\'' + x.id + '\')">В архив</button> ' +
-              '<button class="btn btn-d btn-sm" onclick="delD(\'' + x.id + '\')">Удалить</button>';
+        act = '<button class="btn btn-g btn-sm" onclick="archD(\' + x.id + \')">В архив</button> ' +
+              '<button class="btn btn-d btn-sm" onclick="delD(\' + x.id + \')">' + ICONS.trash + '</button>';
       } else {
-        act = '<button class="btn btn-g btn-sm" onclick="actD(\'' + x.id + '\')">Вернуть</button> ' +
-              '<button class="btn btn-d btn-sm" onclick="delD(\'' + x.id + '\')">Удалить</button>';
+        act = '<button class="btn btn-g btn-sm" onclick="actD(\' + x.id + \')">Вернуть</button> ' +
+              '<button class="btn btn-d btn-sm" onclick="delD(\' + x.id + \')">' + ICONS.trash + '</button>';
       }
     }
     return '<div class="card">' +
@@ -2756,20 +2836,20 @@ function renD() {
 
 async function archD(id) {
   if (disc[id]) disc[id].status = 'archive';
-  await EncryptedDB.saveAll();
+  await db.ref('cgb_disciplinary/' + id + '/status').set('archive');
   renD();
 }
 
 async function actD(id) {
   if (disc[id]) disc[id].status = 'active';
-  await EncryptedDB.saveAll();
+  await db.ref('cgb_disciplinary/' + id + '/status').set('active');
   renD();
 }
 
 async function delD(id) {
   if (!confirm('Удалить запись о взыскании?')) return;
   delete disc[id];
-  await EncryptedDB.saveAll();
+  await db.ref('cgb_disciplinary/' + id).remove();
   renD();
 }
 
@@ -2814,43 +2894,43 @@ function rep() {
   });
   const up = Object.values(uniq);
 
-  let t = '═══════════════════════════════════════\n' +
-          '  ОТЧЁТ ПО ПРОВЕРКАМ ЛИЧНОГО СОСТАВА ЦГБ\n' +
-          '  Период: ' + fromS + ' — ' + toS + '\n' +
-          '  Дата формирования: ' + formed + '\n' +
-          '═══════════════════════════════════════\n\n' +
-          '═══════════════════════════════════════\n' +
-          '  ИТОГОВАЯ СВОДКА\n' +
-          '═══════════════════════════════════════\n' +
-          'Проверено сотрудников: ' + checked + '\n' +
-          'Выявлено замечаний: ' + up.length + '\n\n';
+  let t = `═══════════════════════════════════════\n` +
+          `  ОТЧЁТ ПО ПРОВЕРКАМ ЛИЧНОГО СОСТАВА ЦГБ\n` +
+          `  Период: ${fromS} — ${toS}\n` +
+          `  Дата формирования: ${formed}\n` +
+          `═══════════════════════════════════════\n\n` +
+          `═══════════════════════════════════════\n` +
+          `  ИТОГОВАЯ СВОДКА\n` +
+          `═══════════════════════════════════════\n` +
+          `Проверено сотрудников: ${checked}\n` +
+          `Выявлено замечаний: ${up.length}\n\n`;
 
   if (up.length) {
-    t += 'Список замечаний:\n';
+    t += `Список замечаний:\n`;
     up.forEach((p, i) => {
-      t += '  ' + (i + 1) + '. ' + p.surname + ' ' + p.name + ' | ' + p.passport + ' (' + p.dep + ')\n' +
-           '     Не пройдено: ' + p.bad.join(', ') + '\n';
+      t += `  ${i + 1}. ${p.surname} ${p.name} | ${p.passport} (${p.dep})\n` +
+           `     Не пройдено: ${p.bad.join(', ')}\n`;
     });
-    t += '\n';
+    t += `\n`;
   } else {
-    t += 'Все проверки пройдены успешно, нарушений не выявлено.\n\n';
+    t += `Все проверки пройдены успешно, нарушений не выявлено.\n\n`;
   }
 
-  t += '═══════════════════════════════════════\n' +
-       '  СВОДКА ПО ПРОВЕРЯЮЩИМ\n' +
-       '═══════════════════════════════════════\n';
+  t += `═══════════════════════════════════════\n` +
+       `  СВОДКА ПО ПРОВЕРЯЮЩИМ\n` +
+       `═══════════════════════════════════════\n`;
 
   const ins = Object.entries(byWho).sort((a, b) => b[1] - a[1]);
   if (ins.length) {
-    ins.forEach(([n, c]) => { t += '  ' + n + ' — ' + c + ' провер.\n'; });
+    ins.forEach(([n, c]) => { t += `  ${n} — ${c} провер.\n`; });
   } else {
-    t += '  Нет данных о проверяющих\n';
+    t += `  Нет данных о проверяющих\n`;
   }
 
-  t += '\n───────────────────────────────────────\n';
+  t += `\n───────────────────────────────────────\n`;
   document.getElementById('rO').textContent = t;
   document.getElementById('rM').textContent = 'Отчёт успешно сформирован';
-  document.getElementById('rM').style.color = 'var(--green)';
+  document.getElementById('rM').style.color = 'var(--green-bright)';
 }
 
 async function copyR() {
@@ -2858,13 +2938,13 @@ async function copyR() {
   const msg = document.getElementById('rM');
   if (!t || t === 'Нажми «Сформировать»') {
     msg.textContent = 'Сначала сформируйте отчёт';
-    msg.style.color = 'var(--red)';
+    msg.style.color = 'var(--red-bright)';
     return;
   }
   try {
     await navigator.clipboard.writeText(t);
     msg.textContent = 'Скопировано в буфер обмена';
-    msg.style.color = 'var(--green)';
+    msg.style.color = 'var(--green-bright)';
   } catch(e) {
     const ta = document.createElement('textarea');
     ta.value = t;
@@ -2873,7 +2953,7 @@ async function copyR() {
     document.execCommand('copy');
     document.body.removeChild(ta);
     msg.textContent = 'Скопировано в буфер обмена';
-    msg.style.color = 'var(--green)';
+    msg.style.color = 'var(--green-bright)';
   }
 }
 
@@ -2892,14 +2972,14 @@ async function cUser() {
 
   if (!name || !sur || !loginVal || !pwd) {
     msg.textContent = 'Заполните обязательные поля (Имя, Фамилия, Логин, Пароль)';
-    msg.style.color = 'var(--red)';
+    msg.style.color = 'var(--red-bright)';
     return;
   }
 
   for (const u of Object.values(users)) {
     if ((u.login || '').trim().toLowerCase() === loginVal) {
       msg.textContent = 'Этот логин уже занят';
-      msg.style.color = 'var(--red)';
+      msg.style.color = 'var(--red-bright)';
       return;
     }
   }
@@ -2922,14 +3002,14 @@ async function cUser() {
       avatar: ''
     };
     users[id] = user;
-    await EncryptedDB.saveAll();
+    await db.ref('cgb_users/' + id).set(user);
     msg.textContent = 'Пользователь успешно создан! Логин: ' + loginVal;
-    msg.style.color = 'var(--green)';
+    msg.style.color = 'var(--green-bright)';
     ['uN', 'uS', 'uP', 'uL', 'uW'].forEach(i => document.getElementById(i).value = '');
     renU();
   } catch(e) {
     msg.textContent = e.message;
-    msg.style.color = 'var(--red)';
+    msg.style.color = 'var(--red-bright)';
   }
 }
 
@@ -2943,55 +3023,55 @@ function renU() {
   }
 
   box.innerHTML = en.map(([id, u]) =>
-    '<div class="card">' +
-      '<div class="card-top">' +
-        '<div>' +
-          '<div class="nm">' + esc(u.name) + ' ' + esc(u.surname) + '</div>' +
-          '<div class="hint">' + esc(u.login) + ' · ' + esc(u.passport || '—') + ' · ' +
-            '<span class="badge ' + (u.role === 'admin' ? 'ra' : (u.role === 'senior' ? 'rs' : 're')) + '">' +
-              esc(RL[u.role] || u.role) +
-            '</span>' +
-            (u.active === false ? ' · <span style="color:var(--red)">отключен</span>' : '') +
-          '</div>' +
-        '</div>' +
-        (id !== me.id ?
-          '<div class="acts-row">' +
-            '<select onchange="setR(\'' + id + '\',this.value)" style="font-size:.8rem;padding:4px">' +
-              '<option value="employee"' + (u.role === 'employee' ? ' selected' : '') + '>Сотрудник</option>' +
-              '<option value="senior"' + (u.role === 'senior' ? ' selected' : '') + '>Старший</option>' +
-              '<option value="admin"' + (u.role === 'admin' ? ' selected' : '') + '>Админ</option>' +
-            '</select>' +
-            '<button class="btn btn-g btn-sm" onclick="togU(\'' + id + '\')">' + (u.active === false ? 'Включить' : 'Отключить') + '</button>' +
-            '<button class="btn btn-d btn-sm" onclick="delU(\'' + id + '\')">Удалить</button>' +
-          '</div>' :
-          '<span class="hint" style="font-weight:600">Текущий аккаунт</span>') +
-      '</div>' +
-    '</div>'
+    `<div class="card">
+      <div class="card-top">
+        <div>
+          <div class="nm">${esc(u.name)} ${esc(u.surname)}</div>
+          <div class="hint">${esc(u.login)} · ${esc(u.passport || '—')} · 
+            <span class="badge ${u.role === 'admin' ? 'ra' : (u.role === 'senior' ? 'rs' : 're')}">
+              ${esc(RL[u.role] || u.role)}
+            </span>
+            ${u.active === false ? ' · <span style="color:var(--red-bright)">отключен</span>' : ''}
+          </div>
+        </div>
+        ${id !== me.id ?
+          `<div class="acts-row">
+            <select onchange="setR('${id}',this.value)" style="font-size:.8rem;padding:4px">
+              <option value="employee"${u.role === 'employee' ? ' selected' : ''}>Сотрудник</option>
+              <option value="senior"${u.role === 'senior' ? ' selected' : ''}>Старший</option>
+              <option value="admin"${u.role === 'admin' ? ' selected' : ''}>Админ</option>
+            </select>
+            <button class="btn btn-g btn-sm" onclick="togU('${id}')">${u.active === false ? 'Включить' : 'Отключить'}</button>
+            <button class="btn btn-d btn-sm" onclick="delU('${id}')">${ICONS.trash}</button>
+          </div>` :
+          `<span class="hint" style="font-weight:600">Текущий аккаунт</span>`}
+      </div>
+    </div>`
   ).join('');
 }
 
 async function setR(id, role) {
   if (users[id]) users[id].role = role;
-  await EncryptedDB.saveAll();
+  await db.ref('cgb_users/' + id + '/role').set(role);
   renU();
 }
 
 async function togU(id) {
   const a = users[id] && users[id].active === false ? true : false;
   if (users[id]) users[id].active = a;
-  await EncryptedDB.saveAll();
+  await db.ref('cgb_users/' + id + '/active').set(a);
   renU();
 }
 
 async function delU(id) {
   if (!confirm('Удалить пользователя из системы?')) return;
   delete users[id];
-  await EncryptedDB.saveAll();
+  await db.ref('cgb_users/' + id).remove();
   renU();
 }
 
 /* ==========================================================================
-   НАСТРОЙКИ АККАУНТА, СМЕНА ПАРОЛЯ И РЕЗЕРВНОЕ КОПИРОВАНИЕ
+   НАСТРОЙКИ АККАУНТА
    ========================================================================== */
 async function saveA() {
   const name = document.getElementById('cN').value.trim();
@@ -3001,7 +3081,7 @@ async function saveA() {
 
   if (!name || !sur) {
     msg.textContent = 'Имя и фамилия обязательны';
-    msg.style.color = 'var(--red)';
+    msg.style.color = 'var(--red-bright)';
     return;
   }
   try {
@@ -3013,13 +3093,14 @@ async function saveA() {
       users[me.id].surname = sur;
       users[me.id].passport = pass;
     }
-    await EncryptedDB.saveAll();
+    await db.ref('cgb_users/' + me.id).update({ name, surname: sur, passport: pass });
+    saveSes();
     updAv();
     msg.textContent = 'Данные успешно сохранены';
-    msg.style.color = 'var(--green)';
+    msg.style.color = 'var(--green-bright)';
   } catch(e) {
     msg.textContent = e.message;
-    msg.style.color = 'var(--red)';
+    msg.style.color = 'var(--red-bright)';
   }
 }
 
@@ -3030,12 +3111,12 @@ async function chP() {
 
   if (!p1 || p1.length < 4) {
     msg.textContent = 'Минимальная длина пароля — 4 символа';
-    msg.style.color = 'var(--red)';
+    msg.style.color = 'var(--red-bright)';
     return;
   }
   if (p1 !== p2) {
     msg.textContent = 'Пароли не совпадают';
-    msg.style.color = 'var(--red)';
+    msg.style.color = 'var(--red-bright)';
     return;
   }
   try {
@@ -3045,15 +3126,18 @@ async function chP() {
       users[me.id].salt = CryptoEngine.buf2b64(newSalt);
       users[me.id].passwordHash = newPh;
     }
-    await EncryptedDB.saveAll();
+    await db.ref('cgb_users/' + me.id).update({
+      salt: CryptoEngine.buf2b64(newSalt),
+      passwordHash: newPh
+    });
 
     document.getElementById('np1').value = '';
     document.getElementById('np2').value = '';
     msg.textContent = 'Пароль успешно изменён!';
-    msg.style.color = 'var(--green)';
+    msg.style.color = 'var(--green-bright)';
   } catch(e) {
     msg.textContent = e.message;
-    msg.style.color = 'var(--red)';
+    msg.style.color = 'var(--red-bright)';
   }
 }
 
@@ -3075,7 +3159,8 @@ async function setAv(ev) {
     try {
       me.avatar = r.result;
       if (users[me.id]) users[me.id].avatar = r.result;
-      await EncryptedDB.saveAll();
+      await db.ref('cgb_users/' + me.id + '/avatar').set(r.result);
+      saveSes();
       updAv();
     } catch(e) {
       alert(e.message);
@@ -3084,21 +3169,16 @@ async function setAv(ev) {
   r.readAsDataURL(f);
 }
 
-/* Экспорт и импорт защищенной резервной копии */
 function exportBackup() {
   try {
-    const raw = localStorage.getItem('cgb_secure_vault');
-    const salt = localStorage.getItem('cgb_master_salt');
-    if (!raw) {
-      alert('Нет данных для экспорта');
-      return;
-    }
     const backupObj = {
       app: 'cgb-proverki',
-      version: 2,
+      version: 3,
       exportedAt: new Date().toISOString(),
-      salt: salt,
-      vault: JSON.parse(raw)
+      data: data,
+      categories: categories,
+      disc: disc,
+      users: users
     };
     const blob = new Blob([JSON.stringify(backupObj, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -3108,7 +3188,7 @@ function exportBackup() {
     a.click();
     URL.revokeObjectURL(url);
     document.getElementById('bkM').textContent = 'Резервная копия скачана на устройство';
-    document.getElementById('bkM').style.color = 'var(--green)';
+    document.getElementById('bkM').style.color = 'var(--green-bright)';
   } catch(e) {
     alert('Ошибка экспорта: ' + e.message);
   }
@@ -3121,17 +3201,19 @@ function importBackup(ev) {
   reader.onload = async () => {
     try {
       const backup = JSON.parse(reader.result);
-      if (!backup.vault || !backup.vault.iv || !backup.vault.data) {
+      if (!backup.users || !backup.data) {
         alert('Неверный формат файла резервной копии');
         return;
       }
-      if (!confirm('Восстановить данные из резервной копии? Текущие данные будут заменены.')) return;
+      if (!confirm('Восстановить данные из резервной копии?')) return;
 
-      localStorage.setItem('cgb_secure_vault', JSON.stringify(backup.vault));
-      if (backup.salt) localStorage.setItem('cgb_master_salt', backup.salt);
+      if (backup.data) await db.ref('cgb_proverki').set(backup.data);
+      if (backup.categories) await db.ref('cgb_categories').set(backup.categories);
+      if (backup.disc) await db.ref('cgb_disciplinary').set(backup.disc);
+      if (backup.users) await db.ref('cgb_users').set(backup.users);
 
-      alert('Резервная копия загружена! Пожалуйста, выполните вход с паролем от этой копии.');
-      logout();
+      alert('Резервная копия успешно восстановлена!');
+      location.reload();
     } catch(e) {
       alert('Ошибка импорта: ' + e.message);
     }
@@ -3246,12 +3328,12 @@ function fxPulse(el) {
     c.width = innerWidth * devicePixelRatio;
     c.height = innerHeight * devicePixelRatio;
     ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
-    pts = Array.from({ length: 85 }, () => ({
+    pts = Array.from({ length: 75 }, () => ({
       x: Math.random() * innerWidth,
       y: Math.random() * innerHeight,
       vx: (Math.random() - 0.5) * 0.15,
       vy: (Math.random() - 0.5) * 0.15,
-      r: 1.5 + Math.random() * 2
+      r: 1.5 + Math.random() * 1.8
     }));
   }
   function frame() {
@@ -3266,7 +3348,7 @@ function fxPulse(el) {
         ctx.globalAlpha = 0.22;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = '#9fb7d9';
+        ctx.fillStyle = '#7dd3fc';
         ctx.fill();
       }
     }
@@ -3317,7 +3399,7 @@ async function bootApp() {
     }
   } catch(e) {
     document.getElementById('login').style.display = 'flex';
-    st(false, 'Ошибка: ' + (e && e.message ? e.message : e));
+    st(false, 'Ошибка связи: ' + (e && e.message ? e.message : e));
   }
 }
 
